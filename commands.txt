@@ -1,7 +1,8 @@
-##commands in integrated terminal to add GITHUB Token
-
+##commands in integrated terminal to add MCP for GITHUB Token
+setx GITHUB_TOKEN "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"
 cmd /c "claude mcp add github --scope project -e GITHUB_PERSONAL_ACCESS_TOKEN=%GITHUB_TOKEN% -- npx -y @modelcontextprotocol/server-github"
-
+claude mcp add -s user --transport http gitHub https://api.githubcopilot.com/mcp -H "Authorization: Bearer actual_github_token"	 
+ 
 *****
 ##commands for new feature/project to work on to avoid context rot and switch between repositories
 git worktree list
@@ -25,6 +26,8 @@ do the UI review of the application and share your recommendations, run the suba
 manage subagents
 review the priorauth request creation form for validation and accessibility
 
+##added fixbug.md under /.claude/commands/ to chain subagents
+/fixbug New Request button not working on the top bar
 
 *****
 ##link 
@@ -34,7 +37,7 @@ https://github.com/abhishek-citiustech/sdd_demo
 
 
 
-front yaml matter (for subagent, for example ui-reviewer.md)
+yaml front matter (for subagent, for example ui-reviewer.md)
 
 *************************
 https://sftp.citiustech.com/web/client/pubshares/fZkpNfg7rAYLs8JEJw3pRT/upload
@@ -42,3 +45,14 @@ kamalg, Kamal@1234
 
 
 
+*************************
+For main context
+my secret code is 5555
+
+aciagi3
+
+*****************************
+Change to plan mode and with /batch command
+3 independent tasks: (1) add pagination (page, pageSize) to GET /api/authorizations in AuthorizationsController.cs, (2) add server-side validation in POST /api/authorizations using DTOs/Dtos.cs, (3) add loading spinner + error banner to DashboardPage.tsx. Separate PRs, no shared files.
+
+********************************
