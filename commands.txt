@@ -1,0 +1,44 @@
+##commands in integrated terminal to add GITHUB Token
+
+cmd /c "claude mcp add github --scope project -e GITHUB_PERSONAL_ACCESS_TOKEN=%GITHUB_TOKEN% -- npx -y @modelcontextprotocol/server-github"
+
+*****
+##commands for new feature/project to work on to avoid context rot and switch between repositories
+git worktree list
+git worktree add ../NewFeaturework -b feature/NewFeaturework
+cd ../NewFeaturework
+git branch --show-current
+git checkout feature/NewFeaturework (command not working ignore)
+claude
+
+
+*****
+#GITHUB Config commands
+git config --global user.email "jaswantsingh.bhavnani@citiustech.com"
+git config --global user.name "CTJaswant"
+
+
+*****
+##Claude prompt
+do I have any open PR requests on this repo?
+do the UI review of the application and share your recommendations, run the subagent in the background
+manage subagents
+review the priorauth request creation form for validation and accessibility
+
+
+*****
+##link 
+https://github.com/abhishek-citiustech/sdd_demo
+
+
+
+
+
+front yaml matter (for subagent, for example ui-reviewer.md)
+
+*************************
+https://sftp.citiustech.com/web/client/pubshares/fZkpNfg7rAYLs8JEJw3pRT/upload
+kamalg, Kamal@1234
+
+
+
