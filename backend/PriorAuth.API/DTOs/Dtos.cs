@@ -110,3 +110,21 @@ public record ProcedureSummary(
     string Description,
     int Quantity
 );
+
+// ─── ELIGIBILITY DTOs ───────────────────────────────────────────
+
+public record EligibilityCheckRequest(
+    string PatientId,
+    int HealthPlanId,
+    string? CorrelationId
+);
+
+public record EligibilityCheckResponse(
+    string Status,
+    string PatientId,
+    int HealthPlanId,
+    string CorrelationId,
+    DateTime CheckedAt,
+    string? ErrorCode,
+    string? ErrorMessage
+);

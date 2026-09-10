@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd backend/PriorAuth.API && dotnet build --no-restore 2>&1 | tail -5",
+            "timeout": 60,
+            "statusMessage": "Verifying build..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo $CLAUDE_TOOL_INPUT | grep -iE 'dateOfBirth|firstName|lastName|memberId|phone|emailAddress' > /dev/null 2>&1 && echo 'HIPAA_GUARD: PHI field in bash command. Blocked.' && exit 2 || exit 0",
+            "statusMessage": "HIPAA guard..."
+          }
+        ]
+      }
+    ]
+  }
+}

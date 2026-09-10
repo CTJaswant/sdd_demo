@@ -68,3 +68,104 @@ There are no automated tests in this repo currently.
 - IDs are domain codes, not surrogate keys, for most master data: `patient_id` (`PT00xxxx`), `physician_id` (`PHYxxx`), `site_id` (`SITExxx`), `procedure_code`/`diagnosis_code` (real CPT/ICD-10 codes). Only `health_plans` and `authorizations` use serial integer IDs.
 - An `Authorization` has one `primary_diagnosis` (FK to `diagnosis_codes`) plus a many-to-many-style `authorization_diagnoses` join table (with `is_primary` flag) — the primary diagnosis is effectively stored twice; keep both in sync when creating/updating.
 - Status values are a fixed set enforced only in application code (`AuthorizationsController.UpdateStatus`), not a DB enum/check constraint: `PENDING`, `APPROVED`, `DENIED`, `CANCELLED`, `IN_REVIEW`.
+
+---
+
+## 4. Compliance Rules
+*Non-negotiable — violation blocks PR*
+
+### 4.1 HIPAA
+**NEVER log these fields in any ILogger call:**
+[LIST ALL PHI FIELD NAMES — e.g.]
+- dateOfBirth, memberId, firstName, lastName
+- phone, emailAddress, addressLine1, addressLine2
+- city, state, zipCode, memberCode, ssn
+
+**NEVER hardcode:** connection strings, API keys, passwords, tokens
+
+**ALWAYS write:** one structured audit log entry per sensitive operation
+- Must contain: correlationId + timestamp + operation result
+- Must NOT contain: any PHI field listed above
+
+**ALWAYS generate:** correlationId if not provided — use Guid.NewGuid()
+
+---
+
+## 5. Naming Conventions
+*Confirmed from reading existing files — not invented*
+
+| Artifact | Pattern | Confirmed from |
+|---|---|---|
+| Controller | `[Domain]sController.cs` | `MembersController.cs` |
+| DTO (request) | `[Feature]Request` record | `DTOs/Dtos.cs` |
+| DTO (response) | `[Feature]Response` record | `DTOs/Dtos.cs` |
+| EF Entity | `[Domain]` class with `[Table]` | `Models/Entities.cs` |
+| React page | `[Name]Page.tsx` | `pages/DashboardPage.tsx` |
+| React component | `[Name].tsx` | `components/SearchSelect.tsx` |
+| API client method | added to `api` object in `client.ts` | `api/client.ts` |
+| TypeScript type | added to `types/index.ts` | `types/index.ts` |
+
+---
+
+## 6. Route Conventions
+*Confirmed from existing controllers*
+
+```
+Pattern  : /api/[controller]/[action]
+Attribute: [Route("api/[controller]")]
+Examples : GET  /api/members
+           POST /api/authorizations
+           POST /api/eligibility/check  ← new feature
+```
+
+---
+
+## 7. Dependency Injection Rules
+*Confirmed from Program.cs*
+
+```csharp
+// ONLY this pattern — no exceptions
+builder.Services.AddScoped<IInterface, Implementation>();
+
+// NEVER
+builder.Services.AddSingleton<...>()   // stateful — concurrency bugs
+builder.Services.AddTransient<...>()   // new DB connection per call
+new MyService()                         // bypasses DI entirely
+```
+
+---
+
+## 8. What Claude Must Do When Uncertain
+
+1. STOP generation immediately
+2. Write the uncertainty to `OPEN_QUESTIONS.md` tagged `[BLOCKING]` or `[NON-BLOCKING]`
+3. `[BLOCKING]`     — Do not proceed. Surface to the human.
+4. `[NON-BLOCKING]` — State assumption explicitly. Continue. Flag for review.
+
+**Never resolve ambiguity silently.**
+**Never pick one interpretation without surfacing the alternatives.**
+
+---
+
+## 9. Approved Packages
+*No additions without updating this section*
+
+### Backend
+[LIST FROM *.csproj — e.g.]
+- Npgsql.EntityFrameworkCore.PostgreSQL 8.0.4
+- Swashbuckle.AspNetCore 6.6.2
+- Microsoft.EntityFrameworkCore.Design 8.0.4
+
+### Frontend
+[LIST FROM package.json — e.g.]
+- react 18.3.1
+- react-router-dom 6.26.0
+- typescript 5.5.3
+
+---
+
+## Patterns Added — 2026-09-10
+
+- **Inline-controller-no-service pattern:** for small, single-endpoint features, logic (lookup, comparison, audit write, response shaping) lives directly in the controller action, injecting `PriorAuthDbContext` only — no service/interface layer, no `AddScoped` registration. Confirmed consistent with the existing `AuthorizationsController.cs` pattern. See `Controllers/EligibilityController.cs`.
+- **Narrowed, PHI-free audit table pattern:** an audit trail can be satisfied with `correlation_id` + `status` + `checked_at` + `data_source` only — deliberately omitting request-supplied identifiers (e.g. `patient_id`, `health_plan_id`) to minimize identity-linkable data at rest, even when those identifiers aren't on CLAUDE.md §4.1's literal PHI list. See `eligibility_checks` / `EligibilityCheck` (`Models/Entities.cs`).
+- **Native (non-Docker) Postgres environments:** this repo's documented `docker compose down -v && docker compose up -d` schema-reset workflow assumes Docker is installed. On a machine running PostgreSQL as a native service instead, apply new `CREATE TABLE` statements directly via `psql` against the existing database (matching the DDL already committed to `database/init.sql`) rather than attempting a Docker-based reset.

@@ -288,3 +288,22 @@ public class AuthorizationDiagnosis
 
     public DiagnosisCode? Diagnosis { get; set; }
 }
+
+[Table("eligibility_checks")]
+public class EligibilityCheck
+{
+    [Key, Column("id")]
+    public int Id { get; set; }
+
+    [Column("correlation_id")]
+    public Guid CorrelationId { get; set; }
+
+    [Column("status")]
+    public string Status { get; set; } = string.Empty;
+
+    [Column("checked_at")]
+    public DateTime CheckedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("data_source")]
+    public string DataSource { get; set; } = "LOCAL_DB";
+}

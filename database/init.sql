@@ -195,3 +195,13 @@ INSERT INTO sites VALUES
 ('SITE003', 'Valley Surgical Center',   '2109876543', '21-0987654', 'Surgical',        'Orthopedics',     '300 Valley Road',      NULL,       'Sacramento',  'CA', '94203', '916-555-3005', '916-555-3006', true,  'Y'),
 ('SITE004', 'Bay Area Heart Institute', '3210987654', '32-1098765', 'Cardiology',      NULL,              '400 Bay Bridge Blvd',  'Level 2',  'Oakland',     'CA', '94607', '510-555-3007', '510-555-3008', false, 'N'),
 ('SITE005', 'Central Valley Hospital',  '4321098765', '43-2109876', 'Hospital',        'Multi-Specialty', '500 Central Ave',      NULL,       'Fresno',      'CA', '93721', '559-555-3009', '559-555-3010', true,  'Y');
+
+-- ─── AUDIT TABLES ────────────────────────────────────────────
+
+CREATE TABLE eligibility_checks (
+    id SERIAL PRIMARY KEY,
+    correlation_id UUID NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    checked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    data_source VARCHAR(20) NOT NULL DEFAULT 'LOCAL_DB'
+);

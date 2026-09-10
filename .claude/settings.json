@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "jq -r '\"[\" + (now|localtime|strftime(\"%Y-%m-%d %H:%M:%S\")) + \"] \" + .tool_name + \" \" + (.tool_input.file_path // .tool_response.filePath // \"unknown\")' >> \"C:/Users/JaswantSinghB/Downloads/sdd_demo/sdd_demo/changelog.txt\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+     {
+       "matcher": "Edit|Write",
+       "hooks": [
+        {
+          "type": "command",
+          "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-verbose-ef-logging.sh"
+        }
+       ]
+     }
+    ]
+  }
+}

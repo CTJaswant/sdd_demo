@@ -94,7 +94,7 @@ public class EligibilityCheck
 }
 ```
 
-No `patientId`, `healthPlanId`, or `errorCode` columns — narrowed audit schema per design-note.md §"Data Handling Design" (supersedes spec.md OQ-02's earlier draft schema). No navigation properties, no FK relationships — this table stands alone.
+No `patientId`, `healthPlanId`, or `errorCode` columns — narrowed audit schema per design-note.md §"Data Handling Design". spec.md §9 OQ-02 has been updated to match this schema. No navigation properties, no FK relationships — this table stands alone.
 
 ### 3.2 Database Migration
 
