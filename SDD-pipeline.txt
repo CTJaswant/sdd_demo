@@ -1,0 +1,20 @@
+Read CLAUDE.md, Specs/member-eligibility/spec.md, and Specs/member-eligibility/design-note.md. Generate Specs/member-eligibility/plan.md. Use the structure from sdd_templates_v2/PLAN.md. New files: Controllers/EligibilityController.cs; Modify (additive only): Models/Entities.cs, DTOs/Dtos.cs, Data/PriorAuthDbContext.cs, Program.cs. Do not touch: any existing controller, entity, or DTO. Dependency order: Step 1: Model Layer — Entities.cs + Dtos.cs (no dependencies), Step 2: Data Layer  — PriorAuthDbContext.cs (depends on Step 1), Step 3: Controller  — EligibilityController.cs (depends on 1+2). Verify: none of the non-goals from spec.md section 7 appear in this plan. All CLAUDE.md compliance rules respected.
+
+********************
+Read Specs/member-eligibility/spec.md, Specs/member-eligibility/design-note.md and Specs/member-eligibility/plan.md. Generate Specs/member-eligibility/tasks.md. Use the structure from SDD_Templates/TASKS.md. Derive the tasks from the plan. Do not invent beyond what the plan specifies. Each task must include: what file changes, pattern reference file, done condition (build passes), and which AC it covers.
+
+********************
+Execute the model layer tasks from Specs/member-eligibility/tasks.md. Read Models/Entities.cs and DTOs/Dtos.cs as pattern references first. Read Specs/member-eligibility/spec.md section 4 for field definitions. Rules: - Execute tasks in the order listed in tasks.md; - After each task: stop and wait for the build hook result; - Only continue if build passes; - Add to existing files only; — do not create new files; - Do not touch any other code 
+
+
+
+
+pipeline
+1. intent
+2. spec
+3. clarify
+4. design
+5. plan
+6. tasks
+7. build
+8. spec-review

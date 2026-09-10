@@ -1,0 +1,2366 @@
+Microsoft Windows [Version 10.0.26100.8246]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo>claude
+ ▐▛███▛█   Claude Code v2.1.266
+▝▜██████▀  Haiku 4.5 · Claude Enterprise
+  ▝▝ ▝▝    ~\Downloads\sdd_demo\sdd_demo
+
+
+> copy section 4 onwards from  Claude.md kept at SDD_Templates to Claude.md in root folder
+
+● I'll help you copy section 4 onwards from the SDD_Templates Claude.md to the root folder's Claude.md. Let me first
+  read both files to see what we're working with.
+
+  Read 2 files (ctrl+o to expand)
+  ⎿  Loaded SDD_Templates\CLAUDE.md
+
+● Now I'll append sections 4-9 from the SDD_Templates/Claude.md to the root Claude.md.
+
+● Update(Claude.md)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Edit file
+ Claude.md
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+  68  - IDs are domain codes, not surrogate keys, for most master data: `patient_id` (`PT00xxxx`), `physician_id` (`PHYx
+      xx`), `site_id` (`SITExxx`), `procedure_code`/`diagnosis_code` (real CPT/ICD-10 codes). Only `health_plans` and `a
+      uthorizations` use serial integer IDs.
+  69  - An `Authorization` has one `primary_diagnosis` (FK to `diagnosis_codes`) plus a many-to-many-style `authorizatio
+      n_diagnoses` join table (with `is_primary` flag) — the primary diagnosis is effectively stored twice; keep both in
+       sync when creating/updating.
+  70  - Status values are a fixed set enforced only in application code (`AuthorizationsController.UpdateStatus`), not a
+       DB enum/check constraint: `PENDING`, `APPROVED`, `DENIED`, `CANCELLED`, `IN_REVIEW`.
+  71 +
+  72 +---
+  73 +
+  74 +## 4. Compliance Rules
+  75 +*Non-negotiable — violation blocks PR*
+  76 +
+  77 +### 4.1 HIPAA
+  78 +**NEVER log these fields in any ILogger call:**
+  79 +[LIST ALL PHI FIELD NAMES — e.g.]
+  80 +- dateOfBirth, memberId, firstName, lastName
+  81 +- phone, emailAddress, addressLine1, addressLine2
+  82 +- city, state, zipCode, memberCode, ssn
+  83 +
+  84 +**NEVER hardcode:** connection strings, API keys, passwords, tokens
+  85 +
+  86 +**ALWAYS write:** one structured audit log entry per sensitive operation
+  87 +- Must contain: correlationId + timestamp + operation result
+  88 +- Must NOT contain: any PHI field listed above
+  89 +
+  90 +**ALWAYS generate:** correlationId if not provided — use Guid.NewGuid()
+  91 +
+  92 +---
+  93 +
+  94 +## 5. Naming Conventions
+  95 +*Confirmed from reading existing files — not invented*
+  96 +
+  97 +| Artifact | Pattern | Confirmed from |
+  98 +|---|---|---|
+  99 +| Controller | `[Domain]sController.cs` | `MembersController.cs` |
+ 100 +| DTO (request) | `[Feature]Request` record | `DTOs/Dtos.cs` |
+ 101 +| DTO (response) | `[Feature]Response` record | `DTOs/Dtos.cs` |
+ 102 +| EF Entity | `[Domain]` class with `[Table]` | `Models/Entities.cs` |
+ 103 +| React page | `[Name]Page.tsx` | `pages/DashboardPage.tsx` |
+ 104 +| React component | `[Name].tsx` | `components/SearchSelect.tsx` |
+ 105 +| API client method | added to `api` object in `client.ts` | `api/client.ts` |
+ 106 +| TypeScript type | added to `types/index.ts` | `types/index.ts` |
+ 107 +
+ 108 +---
+ 109 +
+ 110 +## 6. Route Conventions
+ 111 +*Confirmed from existing controllers*
+ 112 +
+ 113 +```
+ 114 +Pattern  : /api/[controller]/[action]
+ 115 +Attribute: [Route("api/[controller]")]
+ 116 +Examples : GET  /api/members
+ 117 +           POST /api/authorizations
+ 118 +           POST /api/eligibility/check  ← new feature
+ 119 +```
+ 120 +
+ 121 +---
+ 122 +
+ 123 +## 7. Dependency Injection Rules
+ 124 +*Confirmed from Program.cs*
+ 125 +
+ 126 +```csharp
+ 127 +// ONLY this pattern — no exceptions
+ 128 +builder.Services.AddScoped<IInterface, Implementation>();
+ 129 +
+ 130 +// NEVER
+ 131 +builder.Services.AddSingleton<...>()   // stateful — concurrency bugs
+ 132 +builder.Services.AddTransient<...>()   // new DB connection per call
+ 133 +new MyService()                         // bypasses DI entirely
+ 134 +```
+ 135 +
+ 136 +---
+ 137 +
+ 138 +## 8. What Claude Must Do When Uncertain
+ 139 +
+ 140 +1. STOP generation immediately
+ 141 +2. Write the uncertainty to `OPEN_QUESTIONS.md` tagged `[BLOCKING]` or `[NON-BLOCKING]`
+ ▐▛███▛█   Claude Code v2.1.266
+▝▜██████▀  Haiku 4.5 · Claude Enterprise
+  ▝▝ ▝▝    ~\Downloads\sdd_demo\sdd_demo
+
+
+> copy section 4 onwards from  Claude.md kept at SDD_Templates to Claude.md in root folder
+
+● I'll help you copy section 4 onwards from the SDD_Templates Claude.md to the root folder's Claude.md. Let me first
+  read both files to see what we're working with.
+
+  Read 2 files (ctrl+o to expand)
+  ⎿  Loaded SDD_Templates\CLAUDE.md
+
+● Now I'll append sections 4-9 from the SDD_Templates/Claude.md to the root Claude.md.
+
+● Update(Claude.md)
+  ⎿  Added 93 lines
+       68  - IDs are domain codes, not surrogate keys, for most master data: `patient_id` (`PT00xxxx`), `physicia
+           n_id` (`PHYxxx`), `site_id` (`SITExxx`), `procedure_code`/`diagnosis_code` (real CPT/ICD-10 codes). On
+           ly `health_plans` and `authorizations` use serial integer IDs.
+       69  - An `Authorization` has one `primary_diagnosis` (FK to `diagnosis_codes`) plus a many-to-many-style `
+           authorization_diagnoses` join table (with `is_primary` flag) — the primary diagnosis is effectively st
+           ored twice; keep both in sync when creating/updating.
+       70  - Status values are a fixed set enforced only in application code (`AuthorizationsController.UpdateSta
+           tus`), not a DB enum/check constraint: `PENDING`, `APPROVED`, `DENIED`, `CANCELLED`, `IN_REVIEW`.
+       71 +
+       72 +---
+       73 +
+       74 +## 4. Compliance Rules
+       75 +*Non-negotiable — violation blocks PR*
+       76 +
+       77 +### 4.1 HIPAA
+       78 +**NEVER log these fields in any ILogger call:**
+       79 +[LIST ALL PHI FIELD NAMES — e.g.]
+       80 +- dateOfBirth, memberId, firstName, lastName
+       81 +- phone, emailAddress, addressLine1, addressLine2
+       82 +- city, state, zipCode, memberCode, ssn
+       83 +
+       84 +**NEVER hardcode:** connection strings, API keys, passwords, tokens
+       85 +
+       86 +**ALWAYS write:** one structured audit log entry per sensitive operation
+       87 +- Must contain: correlationId + timestamp + operation result
+       88 +- Must NOT contain: any PHI field listed above
+       89 +
+       90 +**ALWAYS generate:** correlationId if not provided — use Guid.NewGuid()
+       91 +
+       92 +---
+       93 +
+       94 +## 5. Naming Conventions
+       95 +*Confirmed from reading existing files — not invented*
+       96 +
+       97 +| Artifact | Pattern | Confirmed from |
+       98 +|---|---|---|
+       99 +| Controller | `[Domain]sController.cs` | `MembersController.cs` |
+      100 +| DTO (request) | `[Feature]Request` record | `DTOs/Dtos.cs` |
+      101 +| DTO (response) | `[Feature]Response` record | `DTOs/Dtos.cs` |
+      102 +| EF Entity | `[Domain]` class with `[Table]` | `Models/Entities.cs` |
+      103 +| React page | `[Name]Page.tsx` | `pages/DashboardPage.tsx` |
+      104 +| React component | `[Name].tsx` | `components/SearchSelect.tsx` |
+      105 +| API client method | added to `api` object in `client.ts` | `api/client.ts` |
+      106 +| TypeScript type | added to `types/index.ts` | `types/index.ts` |
+      107 +
+      108 +---
+      109 +
+      110 +## 6. Route Conventions
+      111 +*Confirmed from existing controllers*
+      112 +
+      113 +```
+      114 +Pattern  : /api/[controller]/[action]
+      115 +Attribute: [Route("api/[controller]")]
+      116 +Examples : GET  /api/members
+      117 +           POST /api/authorizations
+      118 +           POST /api/eligibility/check  ← new feature
+      119 +```
+      120 +
+      121 +---
+      122 +
+      123 +## 7. Dependency Injection Rules
+      124 +*Confirmed from Program.cs*
+      125 +
+      126 +```csharp
+      127 +// ONLY this pattern — no exceptions
+      128 +builder.Services.AddScoped<IInterface, Implementation>();
+      129 +
+      130 +// NEVER
+      131 +builder.Services.AddSingleton<...>()   // stateful — concurrency bugs
+      132 +builder.Services.AddTransient<...>()   // new DB connection per call
+      133 +new MyService()                         // bypasses DI entirely
+      134 +```
+      135 +
+      136 +---
+      137 +
+      138 +## 8. What Claude Must Do When Uncertain
+      139 +
+      140 +1. STOP generation immediately
+      141 +2. Write the uncertainty to `OPEN_QUESTIONS.md` tagged `[BLOCKING]` or `[NON-BLOCKING]`
+      142 +3. `[BLOCKING]`     — Do not proceed. Surface to the human.
+      143 +4. `[NON-BLOCKING]` — State assumption explicitly. Continue. Flag for review.
+      144 +
+      145 +**Never resolve ambiguity silently.**
+      146 +**Never pick one interpretation without surfacing the alternatives.**
+      147 +
+      148 +---
+      149 +
+      150 +## 9. Approved Packages
+      151 +*No additions without updating this section*
+      152 +
+      153 +### Backend
+      154 +[LIST FROM *.csproj — e.g.]
+      155 +- Npgsql.EntityFrameworkCore.PostgreSQL 8.0.4
+      156 +- Swashbuckle.AspNetCore 6.6.2
+      157 +- Microsoft.EntityFrameworkCore.Design 8.0.4
+      158 +
+      159 +### Frontend
+      160 +[LIST FROM package.json — e.g.]
+      161 +- react 18.3.1
+      162 +- react-router-dom 6.26.0
+      163 +- typescript 5.5.3
+
+● Done! I've successfully copied sections 4 through 9 from SDD_Templates/Claude.md to the root Claude.md. The file now
+  includes:
+
+  - Section 4: Compliance Rules (HIPAA requirements)
+  - Section 5: Naming Conventions (Controllers, DTOs, Entities, Components, etc.)
+  - Section 6: Route Conventions (API routing patterns)
+  - Section 7: Dependency Injection Rules (AddScoped patterns)
+  - Section 8: What Claude Must Do When Uncertain (handling ambiguities)
+  - Section 9: Approved Packages (backend and frontend dependencies)
+
+  The root Claude.md now has the complete governance framework alongside the existing project-specific setup and
+  architecture documentation.
+
+✻ Cooked for 29s · done 12:59 PM
+
+> /usage
+      158 +
+      159 +### Frontend
+      160 +[LIST FROM package.json — e.g.]
+      161 +- react 18.3.1
+      162 +- react-router-dom 6.26.0
+      163 +- typescript 5.5.3
+
+● Done! I've successfully copied sections 4 through 9 from SDD_Templates/Claude.md to the root Claude.md. The file now
+  includes:
+
+  - Section 4: Compliance Rules (HIPAA requirements)
+  - Section 5: Naming Conventions (Controllers, DTOs, Entities, Components, etc.)
+  - Section 6: Route Conventions (API routing patterns)
+  - Section 7: Dependency Injection Rules (AddScoped patterns)
+  - Section 8: What Claude Must Do When Uncertain (handling ambiguities)
+  - Section 9: Approved Packages (backend and frontend dependencies)
+
+  The root Claude.md now has the complete governance framework alongside the existing project-specific setup and
+  architecture documentation.
+
+✻ Cooked for 29s · done 12:59 PM
+
+> /usage
+  ⎿  Settings dialog dismissed
+
+> /model
+  ⎿  Set model to Sonnet 5 and saved as your default for new sessions
+
+※ recap: Copied sections 4-9 (Compliance, Naming, Routes, DI Rules, Uncertainty Handling, Approved Packages) from
+  SDD_Templates/Claude.md into the root Claude.md, completing the governance doc. Task is done; next step is to review
+  the merged file if you want any placeholders filled in. (disable recaps in /config)
+
+> Read Specs/member-eligibility/intent.md, Specs/member-eligibility/risk-classification.md,and CLAUDE.md. Generate
+  Specs/member-eligibility/spec.md using SDD_Templates/SPEC.md as the structure. Derive everything from the three input
+  files. Where the intent is silent, state your assumption and flag it as an open question in section 9. Do not ask me
+  questions — surface them in the spec itself.
+
+● I'll read the three input files plus the SPEC.md template to build the spec.
+
+  Read 4 files (ctrl+o to expand)
+
+● Let me check the actual codebase structure to ground the API contract and technical details accurately.
+
+  Searched for 2 patterns, read 4 files (ctrl+o to expand)
+
+● No audit table exists yet — confirms this feature needs to create one. I have everything needed. Now I'll write the
+  spec.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Good — I have concrete test data (PT001234/CIGNA=ELIGIBLE, PT001235 is AETNA which mismatches CIGNA health plan for
+  INELIGIBLE case, and no audit table exists yet). Now writing the spec.
+
+● Write(Specs\member-eligibility\spec.md)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Create file
+ Specs\member-eligibility\spec.md
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+    1 # SPEC.md — Member Eligibility Check (Phase 1)
+    2 # Location : Specs/member-eligibility/spec.md
+    3 # Committed : YES
+    4 # Status    : DRAFT
+    5 # Author    : Claude Code | Date: 2026-09-10
+    6 # Branch    : feature/member-eligibility
+    7 #
+    8 # PURPOSE: Define WHAT the feature does and WHY — not HOW.
+    9 # HOW is answered in PLAN.md.
+   10 # EVERY acceptance criterion must trace to a verifiable test.
+   11 # ─────────────────────────────────────────────────────────────
+   12
+   13 ---
+   14
+   15 ## Risk Classification
+   16
+   17 Risk Level: **Medium** (see `Specs/member-eligibility/risk-classification.md`).
+   18 Involves PHI/identity data and affects audit/compliance evidence — privacy and audit evidence review required.
+      Tech lead, QA/validation, and product owner review are the required human gates before implementation proceeds.
+   19
+   20 ---
+   21
+   22 ## 1. Overview
+   23
+   24 ### 1.1 Problem Statement
+   25 Non-clinical intake agents creating prior authorization (PA) requests have no way to verify, at the point of in
+      take, whether the member they selected is actually enrolled in the health plan they selected. Because the wizar
+      d does not check this, mismatches between member and plan are only discovered after submission, causing rework.
+   26
+   27 ### 1.2 Proposed Solution
+   28 Add a local, database-only eligibility check to step 4 (member selection) of the PA request wizard. When an age
+      nt has selected both a member and a health plan, the system compares the member's `plan_code` to the health pla
+      n's `plan_code` and returns one of three statuses: ELIGIBLE, INELIGIBLE, or ERROR. The check is advisory — it d
+      oes not block PA creation — and every check is recorded in an audit log containing no PHI.
+   29
+   30 ### 1.3 Success Criteria
+   31 The agent can trigger an eligibility check from wizard step 4 and receive ELIGIBLE, INELIGIBLE, or ERROR within
+       500ms, with one PHI-free audit record written per check, zero `dotnet build` warnings, and a COMPLIANT result
+      from `/hipaa-check`.
+   32
+   33 ---
+   34
+   35 ## 2. Functional Requirements
+   36
+   37 ### 2.1 Core Behaviour
+   38 When an intake agent has chosen a member and a health plan in the wizard, they can request an eligibility check
+      . The system looks up the member and the health plan by their identifiers. If either does not exist, the result
+       is ERROR. If both exist, the system compares the member's plan code to the health plan's plan code: an exact m
+      atch is ELIGIBLE; anything else (a different code, or the member's plan code being absent) is INELIGIBLE. The r
+      esult is shown to the agent, who may proceed with PA creation regardless of the result. Every check — regardles
+      s of outcome — produces exactly one audit record containing a correlation ID, a timestamp, and the result, but
+      no member or provider identifying/demographic data.
+   39
+   40 FR-01: The system shall provide an endpoint that accepts a member identifier and a health plan identifier and r
+      eturns an eligibility status.
+   41 FR-02: The system shall return ELIGIBLE when the member exists, the health plan exists, and the member's `plan_
+      code` equals the health plan's `plan_code` (case-sensitive exact match, per CLAUDE.md §4.1 no invented normaliz
+      ation rules).
+   42 FR-03: The system shall return INELIGIBLE when the member exists, the health plan exists, and the member's `pla
+      n_code` does not equal the health plan's `plan_code` — including when the member's `plan_code` is NULL.
+   43 FR-04: The system shall return ERROR when the member is not found, the health plan is not found, or both.
+   44 FR-05: The system shall not block or alter PA request submission based on the eligibility result — the check is
+       advisory only.
+   45 FR-06: The system shall write exactly one audit record per eligibility check, containing a correlation ID, a UT
+      C timestamp, and the result status, and shall generate a correlation ID via `Guid.NewGuid()` if the caller does
+       not supply one.
+   46 FR-07: The system shall not include any PHI field (per CLAUDE.md §4.1) in the audit record, in any log entry, o
+      r in any error message produced by this feature.
+   47 FR-08: The frontend shall surface the eligibility check as part of wizard step 4 (member selection), displaying
+       the result to the agent without preventing further progress through the wizard.
+   48
+   49 ### 2.2 User Flows
+   50
+   51 **Flow 1 — Eligible member:**
+   52 1. Agent selects a member and a health plan in wizard step 4.
+   53 2. System calls the eligibility endpoint with the member's `patientId` and the health plan's `healthPlanId`.
+   54 3. System finds both records; member's `plan_code` matches the health plan's `plan_code`.
+   55 4. System returns ELIGIBLE and writes one audit record.
+   56 5. Agent sees an ELIGIBLE indicator and continues the wizard.
+   57
+   58 **Flow 2 — Ineligible member (plan mismatch):**
+   59 1. Agent selects a member and a health plan in wizard step 4.
+   60 2. System calls the eligibility endpoint.
+   61 3. System finds both records; member's `plan_code` does not match (or is NULL).
+   62 4. System returns INELIGIBLE and writes one audit record.
+   63 5. Agent sees an INELIGIBLE indicator but can still proceed to submit the PA request.
+   64
+   65 **Flow 3 — Member or plan not found:**
+   66 1. Agent selects a member/plan combination where one identifier does not resolve to a record (e.g., stale selec
+      tion).
+   67 2. System calls the eligibility endpoint.
+   68 3. System cannot find the member and/or the health plan.
+   69 4. System returns ERROR (no PHI in the error body) and writes one audit record.
+   70 5. Agent sees an ERROR indicator but can still proceed to submit the PA request.
+   71
+   72 ---
+   73
+   74 ## 3. Acceptance Criteria
+   75 *Each criterion: testable, binary (pass/fail), observable (Swagger / log / test)*
+   76 *No "should", "mostly", or "approximately"*
+   77
+   78 | ID    | Given | When | Then | Verified By |
+   79 |-------|-------|------|------|-------------|
+   80 | AC-01 | A valid request with patientId `PT001234` and healthPlanId for Cigna (`plan_code = CIGNA`) | POST /ap
+      i/eligibility/check is called | Response is HTTP 200 with status ELIGIBLE | Swagger |
+   81 | AC-02 | A valid request with patientId `PT001235` (`plan_code = AETNA`) and healthPlanId for Cigna (`plan_cod
+      e = CIGNA`) | POST /api/eligibility/check is called | Response is HTTP 200 with status INELIGIBLE | Swagger |
+   82 | AC-03 | A request with a patientId that does not exist in `members` | POST /api/eligibility/check is called |
+       Response is HTTP 200 with status ERROR and an error code, no HTTP 4xx/5xx | Swagger |
+   83 | AC-04 | A request with a healthPlanId that does not exist in `health_plans` | POST /api/eligibility/check is
+      called | Response is HTTP 200 with status ERROR and an error code | Swagger |
+   84 | AC-05 | A member whose `plan_code` is NULL, checked against any health plan | POST /api/eligibility/check is
+      called | Response is HTTP 200 with status INELIGIBLE | Swagger |
+   85 | AC-06 | A malformed request body (missing patientId or healthPlanId) | POST /api/eligibility/check is called
+      | Response is HTTP 400 | Swagger |
+   86 | AC-07 | Any valid eligibility check | Is executed | Response is returned within 500ms | Manual timing / test
+      |
+   87 | AC-08 | Any eligibility check (ELIGIBLE, INELIGIBLE, or ERROR) | Is executed | Exactly one audit record is wr
+      itten with correlationId, timestamp, and status | Log/DB inspection |
+   88 | AC-09 | Any generated code for this feature | Is scanned | No PHI field names (per CLAUDE.md §4.1) appear in
+      any ILogger call or audit record | `/hipaa-check` COMPLIANT |
+   89 | AC-10 | All code changes for this feature | `dotnet build` is run | Zero errors, zero warnings | Build output
+       |
+   90 | AC-11 | Wizard step 4 with a member and health plan selected | Agent triggers the eligibility check in the UI
+       | Result (ELIGIBLE/INELIGIBLE/ERROR) is displayed and the agent can still advance the wizard | Manual UI test
+      |
+   91
+   92 ---
+   93
+   94 ## 4. API Contract
+   95
+   96 ### 4.1 Endpoint
+   97 ```
+   98 POST /api/eligibility/check
+   99 Content-Type: application/json
+  100 ```
+  101
+  102 ### 4.2 Request Schema
+  103 ```json
+  104 {
+  105   "patientId": "PT001234",
+  106   "healthPlanId": 1,
+  107   "correlationId": null
+  108 }
+  109 ```
+  110
+  111 | Field | Type | Required | Validation | Notes |
+  112 |-------|------|----------|------------|-------|
+  113 | patientId | string | Yes | Non-empty | Member's `patient_id` (e.g. `PT001234`) |
+  114 | healthPlanId | integer | Yes | Positive integer | `health_plan_id` from `health_plans` |
+  115 | correlationId | string (GUID) | No | Valid GUID if provided | Generated via `Guid.NewGuid()` if omitted |
+  116
+  117 ### 4.3 Response Schema
+  118 ```json
+  119 {
+  120   "status": "ELIGIBLE",
+  121   "patientId": "PT001234",
+  122   "healthPlanId": 1,
+  123   "correlationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  124   "checkedAt": "2026-09-10T14:32:00Z",
+  125   "errorCode": null,
+  126   "errorMessage": null
+  127 }
+  128 ```
+  129
+  130 | Field | Type | Notes |
+  131 |-------|------|-------|
+  132 | status | string | One of `ELIGIBLE`, `INELIGIBLE`, `ERROR` |
+  133 | patientId | string | Echoed from request |
+  134 | healthPlanId | integer | Echoed from request |
+  135 | correlationId | string | Echoed if supplied, else generated |
+  136 | checkedAt | string (ISO-8601 UTC) | Server timestamp of the check |
+  137 | errorCode | string \| null | Populated only when status is ERROR |
+  138 | errorMessage | string \| null | Populated only when status is ERROR; must not contain PHI |
+  139
+  140 ### 4.4 Error Responses
+  141
+  142 | HTTP Status | Error Code | Trigger |
+  143 |-------------|------------|---------|
+  144 | 200 | `MBR-001` | Member (`patientId`) not found — returned in body as status ERROR, not as HTTP error |
+  145 | 200 | `PLN-001` | Health plan (`healthPlanId`) not found — returned in body as status ERROR |
+  146 | 400 | — | Malformed request body (missing/invalid `patientId` or `healthPlanId`) |
+  147 | 500 | `SYS-001` | Unhandled internal error (e.g. database unavailable) |
+  148
+  149 ---
+  150
+  151 ## 5. Non-Functional Requirements
+  152
+  153 | Category | Requirement |
+  154 |----------|-------------|
+  155 | Performance | Response time under 500ms for the local DB lookup (per intent.md Success Criteria) |
+  156 | Security | No PHI in logs, audit records, or error messages (CLAUDE.md §4.1) |
+  157 | Compliance | One structured, PHI-free audit record per check, containing correlationId + timestamp + result (
+      CLAUDE.md §4.1) |
+  158 | Reliability | Database/lookup failure returns HTTP 500 with `SYS-001` rather than an unhandled exception; doe
+      s not block wizard progression |
+  159
+  160 ---
+  161
+  162 ## 6. Constraints
+  163 *What MUST be respected — derived from CLAUDE.md*
+  164
+  165 1. Zero modification to existing controllers, services, or entities (`Member`, `HealthPlan`, `MembersController
+      `, `HealthPlansController` stay untouched — new endpoint lives in its own controller/service).
+  166 2. Route follows `/api/[controller]` convention — `/api/eligibility/check` (CLAUDE.md §6).
+  167 3. New eligibility service registered as `AddScoped<IInterface, Implementation>` in `Program.cs` (CLAUDE.md §7)
+       — no `AddSingleton`, no `AddTransient`, no manual `new`.
+  168 4. EF Core LINQ only — no raw SQL (CLAUDE.md §2.1, §3.1).
+  169 5. No PHI in any `ILogger` call — CLAUDE.md §4.1 field list applies in full.
+  170 6. No hardcoded connection strings, API keys, or tokens (CLAUDE.md §4.1).
+  171 7. No new NuGet or npm packages without updating CLAUDE.md §9 (this feature is scoped to require none).
+  172 8. Build must pass with zero errors and zero warnings (CLAUDE.md §3.1).
+  173 9. New audit persistence must not alter the existing `authorizations`/`members`/`health_plans` schema — it is a
+      n additive table (see Open Questions, OQ-02).
+  174
+  175 ---
+  176
+  177 ## 7. Non-Goals
+  178 *MINIMUM 4 entries — what this spec explicitly does NOT include*
+  179
+  180 - ❌ Real-time payer/health-plan API integration — explicitly deferred to Phase 2 (intent.md).
+  181 - ❌ Blocking PA submission when the result is INELIGIBLE — check is advisory only (intent.md).
+  182 - ❌ Date-based eligibility (effective/termination date checking) — explicitly out of scope (intent.md).
+  183 - ❌ Benefit-level or procedure-specific coverage eligibility — explicitly out of scope (intent.md).
+  184 - ❌ Caching of eligibility results across requests — not mentioned in intent.md, not required by success crite
+      ria.
+  185 - ❌ Role-based access control / authentication changes on this endpoint — not mentioned in intent.md; existing
+       app has no auth layer to extend.
+  186
+  187 ---
+  188
+  189 ## 8. Test Data
+  190 *Exact records that must exist for ACs to pass — sourced from `database/init.sql`*
+  191
+  192 | patientId | plan_code (member) | healthPlanId | plan_code (health plan) | Expected AC Result |
+  193 |-----------|--------------------|--------------|--------------------------|---------------------|
+  194 | PT001234 | CIGNA | 1 (Cigna Health, plan_code=CIGNA) | CIGNA | ELIGIBLE (AC-01) |
+  195 | PT001235 | AETNA | 1 (Cigna Health, plan_code=CIGNA) | CIGNA | INELIGIBLE (AC-02) |
+  196 | PT999999 (does not exist) | N/A | 1 | CIGNA | ERROR MBR-001 (AC-03) |
+  197 | PT001234 | CIGNA | 9999 (does not exist) | N/A | ERROR PLN-001 (AC-04) |
+  198
+  199 Note: no existing member in `database/init.sql` has a NULL `plan_code` (AC-05) — a test-only record or a mocked
+       scenario is required for that case; this is flagged in Open Questions (OQ-03).
+  200
+  201 ---
+  202
+  203 ## 9. Open Questions
+  204 *Claude writes here when uncertain — human resolves before PLAN.md is written*
+  205
+  206 | ID | Question | Tag | Assumption | Status |
+  207 |----|----------|-----|------------|--------|
+  208 | OQ-01 | `health_plans` has two similar-looking code columns: `plan_code` and `ins_plan_code`. intent.md says
+      "health plan's `plan_code`" — is that literally the `plan_code` column, or was `ins_plan_code` intended? | [BLO
+      CKING] | Assumed `plan_code` column on `health_plans`, matching intent.md's literal wording and matching `membe
+  Specs/member-eligibility/spec.md using SDD_Templates/SPEC.md as the structure. Derive everything from the three input
+  files. Where the intent is silent, state your assumption and flag it as an open question in section 9. Do not ask me
+  questions — surface them in the spec itself.
+
+● I'll read the three input files plus the SPEC.md template to build the spec.
+
+  Read 4 files (ctrl+o to expand)
+
+● Let me check the actual codebase structure to ground the API contract and technical details accurately.
+
+  Searched for 2 patterns, read 4 files (ctrl+o to expand)
+
+● No audit table exists yet — confirms this feature needs to create one. I have everything needed. Now I'll write the
+  spec.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Good — I have concrete test data (PT001234/CIGNA=ELIGIBLE, PT001235 is AETNA which mismatches CIGNA health plan for
+  INELIGIBLE case, and no audit table exists yet). Now writing the spec.
+
+● Write(Specs\member-eligibility\spec.md)
+  ⎿  Wrote 213 lines to Specs\member-eligibility\spec.md
+       1 # SPEC.md — Member Eligibility Check (Phase 1)
+       2 # Location : Specs/member-eligibility/spec.md
+       3 # Committed : YES
+       4 # Status    : DRAFT
+       5 # Author    : Claude Code | Date: 2026-09-10
+       1 # SPEC.md — Member Eligibility Check (Phase 1)
+       2 # Location : Specs/member-eligibility/spec.md
+       3 # Committed : YES
+       4 # Status    : DRAFT
+       5 # Author    : Claude Code | Date: 2026-09-10
+       6 # Branch    : feature/member-eligibility
+       7 #
+       8 # PURPOSE: Define WHAT the feature does and WHY — not HOW.
+       9 # HOW is answered in PLAN.md.
+      10 # EVERY acceptance criterion must trace to a verifiable test.
+     … +255 lines (ctrl+o to expand)
+
+● Created Specs/member-eligibility/spec.md, derived entirely from intent.md, risk-classification.md, and CLAUDE.md, cross-checked
+  against the actual Entities.cs/Dtos.cs/init.sql for real field names and test data.
+
+  Key points:
+  - Risk Classification section links the Medium-risk assessment and its required review gates up front.
+  - API contract (POST /api/eligibility/check) uses real schema fields (patient_id, health_plan_id, plan_code) and CLAUDE.md's own
+    route example.
+  - Test data table uses actual seed rows (PT001234/CIGNA vs PT001235/AETNA against health plan CIGNA) rather than invented IDs.
+  - 6 open questions in Section 9, most notably OQ-01 (BLOCKING): health_plans has both a plan_code and an ins_plan_code column —
+    intent.md's wording points to plan_code, but this needs human confirmation before PLAN.md is written since it changes the core
+    matching logic.
+
+  Next step would normally be resolving OQ-01 before drafting PLAN.md.
+
+✻ Worked for 1m 35s · done 1:11 PM
+
+> /sdd-clarify
+
+  Read 2 files (ctrl+o to expand)
+
+● === CLARIFICATION REPORT ===
+
+  BLOCKING QUESTIONS (must resolve before plan.md):
+
+  1. OQ-01 (already flagged in spec, still unresolved): Does "health plan's plan_code" mean the plan_code column or the ins_plan_code
+     column on health_plans? — Both exist in Entities.cs; picking the wrong one silently changes every eligibility result. This is a
+     data/matching-logic decision, not an implementation detail, so it blocks writing the comparison logic in PLAN.md.
+  2. Lookup precedence when both patientId and healthPlanId are invalid. Section 4.4 defines MBR-001 and PLN-001 as separate error
+     codes, but nothing states which one wins when both the member and the health plan fail to resolve in the same request
+     (intent.md's definition literally says "OR ... OR" without an order). PLAN.md needs a single fallthrough order (e.g., check
+     member first) or this becomes an implementation guess.
+  3. Audit table architecture (elevate OQ-02 from NON-BLOCKING). This repo has no EF migrations — schema changes are made by editing
+     database/init.sql and require docker compose down -v (a destructive full data reset) to apply, per CLAUDE.md's Backend commands
+     section. A new eligibility_checks table is therefore not a low-impact addition — it dictates a required DB reset step in PLAN.md
+     and affects existing seeded data. This should be confirmed before planning, not left as a background assumption.
+
+  NON-BLOCKING QUESTIONS (can proceed, flag for review):
+
+  1. OQ-03 (NULL plan_code test data doesn't exist in seed data) — assumption: use a test-only record or mocked repository for AC-05,
+     don't touch seed data.
+  2. OQ-04 (case-sensitivity of the plan_code match) — assumption: exact ordinal match, no normalization.
+  3. OQ-05 (is the 500ms budget server-side or end-to-end) — assumption: server-side API response time only.
+  4. Is invalid correlationId format (non-GUID string) a 400, or does the system silently regenerate one? Section 4.2 says "Valid
+     GUID if provided" but section 4.4 doesn't list this as a distinct trigger — it's folded into the generic "malformed request
+     body" row. Assumption: treat an invalid-format correlationId as a 400, same as other malformed-body cases.
+  5. No AC verifies FR-06's auto-generation behavior (correlationId omitted → system generates one and returns it in the response).
+     Assumption: this will be covered by a unit/integration test in PLAN.md even though no AC currently names it explicitly.
+  6. No AC verifies FR-05 end-to-end — i.e., that a PA request can actually be created and saved after an INELIGIBLE or ERROR result,
+     not just that the wizard UI lets the agent click "Next." AC-11 only checks wizard progression, not authorization creation.
+     Assumption: add a PLAN.md-level test for this, or accept AC-11 as sufficient proxy coverage.
+
+  CONSTITUTION CONFLICTS:
+
+  1. Constraint #9 ("additive-only schema") is not actually derivable from CLAUDE.md. CLAUDE.md's Backend commands section says the
+     opposite in spirit: "If you change Models/Entities.cs, update database/init.sql to match (and reset the DB volume)" — i.e., the
+     established convention is to edit init.sql directly, not to treat existing tables as frozen. Constraint #9 should either be
+     removed, reworded to cite this line correctly, or reconciled with the blocking audit-table question above.
+  2. AC-07 and AC-11 verification methods ("Manual timing / test", "Manual UI test") sit uneasily with CLAUDE.md §3.2 Testing
+     Standards, which implies unit tests for service-layer logic and integration tests for API endpoints, with tests passing before
+     merge. Manual-only verification for a 500ms performance AC and a UI-behavior AC is weaker than the constitution's testing bar —
+     PLAN.md should specify an automatable test (e.g., an integration test asserting response time, and a component/E2E test for the
+     wizard) rather than leaving these as manual checks.
+  3. Section 6 doesn't cite CLAUDE.md §5 (Naming Conventions) even though this feature introduces a new controller, DTOs, and a
+     service interface — all of which the naming table governs ([Domain]sController.cs, [Feature]Request/[Feature]Response records).
+     Not a conflict yet, but an omission that PLAN.md will need to fill in explicitly.
+
+  MISSING ACS:
+
+  1. No AC for FR-06 (correlationId auto-generation when omitted from the request).
+  2. No AC for the "both member and health plan not found" case (ties to the blocking precedence question above).
+  3. No AC that verifies FR-05 beyond wizard navigation — i.e., that PA creation actually succeeds after an INELIGIBLE/ERROR result
+     (full flow, not just "can advance").
+
+  RECOMMENDATION:
+
+  Resolve items 1–3 in BLOCKING QUESTIONS before writing PLAN.md — particularly the plan_code vs ins_plan_code ambiguity, since it
+  determines the core comparison logic, and the audit-table/DB-reset decision, since it determines whether PLAN.md needs a docker
+  compose down -v step. The non-blocking items and constitution conflicts can be addressed inline while drafting PLAN.md but should
+  be explicitly noted there rather than silently resolved.
+
+  === END REPORT ===
+
+✻ Cogitated for 52s · done 1:14 PM
+
+※ recap: We're doing spec-driven development for a Member Eligibility feature; I just clarified gaps in spec.md. Next: resolve the
+  blocking questions (plan_code vs ins_plan_code, audit table schema) before writing plan.md. (disable recaps in /config)
+
+> resolve blocking questions and update spec.md
+
+● I'll resolve all three blocking items with evidence from the codebase, then update the spec.
+
+  Resolutions:
+  1. plan_code vs ins_plan_code — resolvable from seed data, not just assumption: health_plans.plan_code values (CIGNA, AETNA,
+     UHC...) exactly match members.plan_code values, while ins_plan_code uses a completely different code space (CIG001, AET001...) —
+     an insurer billing code, not a matching key. Confirmed: use plan_code.
+  2. Lookup precedence when both member and health plan are missing — resolving to "check member first" (member is the subject of
+     "member eligibility"; matches FR ordering already in the spec).
+  3. Audit table / schema change mechanism — resolving to follow CLAUDE.md's own documented convention literally: new
+     eligibility_checks entity added to Models/Entities.cs, table added to database/init.sql, applied via docker compose down -v &&
+     docker compose up -d. This isn't a new constraint — it's what CLAUDE.md already prescribes for entity changes, so I'm also
+     fixing spec Constraint #9, which had incorrectly stated the opposite ("additive-only... zero modification").
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 1 line, removed 1 line
+      40  FR-01: The system shall provide an endpoint that accepts a member identifier and a health plan identifier and return
+          s an eligibility status.
+      41  FR-02: The system shall return ELIGIBLE when the member exists, the health plan exists, and the member's `plan_code`
+           equals the health plan's `plan_code` (case-sensitive exact match, per CLAUDE.md §4.1 no invented normalization rule
+          s).
+      42  FR-03: The system shall return INELIGIBLE when the member exists, the health plan exists, and the member's `plan_cod
+          e` does not equal the health plan's `plan_code` — including when the member's `plan_code` is NULL.
+      43 -FR-04: The system shall return ERROR when the member is not found, the health plan is not found, or both.
+      43 +FR-04: The system shall return ERROR when the member is not found, the health plan is not found, or both. When both
+         +are missing, the system shall check the member first and return error code `MBR-001` (member-not-found takes precede
+         +nce over health-plan-not-found).
+      44  FR-05: The system shall not block or alter PA request submission based on the eligibility result — the check is advi
+          sory only.
+      45  FR-06: The system shall write exactly one audit record per eligibility check, containing a correlation ID, a UTC tim
+          estamp, and the result status, and shall generate a correlation ID via `Guid.NewGuid()` if the caller does not suppl
+          y one.
+      46  FR-07: The system shall not include any PHI field (per CLAUDE.md §4.1) in the audit record, in any log entry, or in
+          any error message produced by this feature.
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 1 line
+      88  | AC-09 | Any generated code for this feature | Is scanned | No PHI field names (per CLAUDE.md §4.1) appear in any I
+          Logger call or audit record | `/hipaa-check` COMPLIANT |
+      89  | AC-10 | All code changes for this feature | `dotnet build` is run | Zero errors, zero warnings | Build output |
+      90  | AC-11 | Wizard step 4 with a member and health plan selected | Agent triggers the eligibility check in the UI | Re
+          sult (ELIGIBLE/INELIGIBLE/ERROR) is displayed and the agent can still advance the wizard | Manual UI test |
+      91 +| AC-12 | A request where both patientId and healthPlanId do not exist | POST /api/eligibility/check is called | Res
+         +ponse is HTTP 200 with status ERROR and errorCode `MBR-001` (member-not-found takes precedence) | Swagger |
+      92
+      93  ---
+      94
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 3 lines, removed 3 lines
+      142
+      143  | HTTP Status | Error Code | Trigger |
+      144  |-------------|------------|---------|
+      145 -| 200 | `MBR-001` | Member (`patientId`) not found — returned in body as status ERROR, not as HTTP error |
+      146 -| 200 | `PLN-001` | Health plan (`healthPlanId`) not found — returned in body as status ERROR |
+      147 -| 400 | — | Malformed request body (missing/invalid `patientId` or `healthPlanId`) |
+      145 +| 200 | `MBR-001` | Member (`patientId`) not found — returned in body as status ERROR, not as HTTP error. Takes pre
+          +cedence when both member and health plan are not found. |
+      146 +| 200 | `PLN-001` | Health plan (`healthPlanId`) not found and the member was found — returned in body as status ER
+          +ROR |
+      147 +| 400 | — | Malformed request body (missing/invalid `patientId` or `healthPlanId`, or `correlationId` present but n
+          +ot a valid GUID) |
+      148  | 500 | `SYS-001` | Unhandled internal error (e.g. database unavailable) |
+      149
+      150  ---
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 2 lines, removed 1 line
+      171  6. No hardcoded connection strings, API keys, or tokens (CLAUDE.md §4.1).
+      172  7. No new NuGet or npm packages without updating CLAUDE.md §9 (this feature is scoped to require none).
+      173  8. Build must pass with zero errors and zero warnings (CLAUDE.md §3.1).
+      174 -9. New audit persistence must not alter the existing `authorizations`/`members`/`health_plans` schema — it is an ad
+          -ditive table (see Open Questions, OQ-02).
+      174 +9. The audit table (`eligibility_checks`) is added as a new EF Core entity in `Models/Entities.cs` plus a matching
+          +`CREATE TABLE` in `database/init.sql`, following this repo's documented convention for entity changes (CLAUDE.md "B
+          +ackend commands": no EF migrations — edit `init.sql` directly, then reset the DB volume with `docker compose down -
+          +v && docker compose up -d`). It must not modify the existing `authorizations`, `members`, or `health_plans` table d
+          +efinitions.
+      175 +10. Naming for new artifacts follows CLAUDE.md §5: `EligibilityController.cs`, `EligibilityCheckRequest`/`Eligibili
+          +tyCheckResponse` records in `DTOs/Dtos.cs`, `EligibilityCheck` entity in `Models/Entities.cs`.
+      176
+      177  ---
+      178
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 1 line
+      197  | PT001235 | AETNA | 1 (Cigna Health, plan_code=CIGNA) | CIGNA | INELIGIBLE (AC-02) |
+      198  | PT999999 (does not exist) | N/A | 1 | CIGNA | ERROR MBR-001 (AC-03) |
+      199  | PT001234 | CIGNA | 9999 (does not exist) | N/A | ERROR PLN-001 (AC-04) |
+      200 +| PT999999 (does not exist) | N/A | 9999 (does not exist) | N/A | ERROR MBR-001 (AC-12) |
+      201
+      202  Note: no existing member in `database/init.sql` has a NULL `plan_code` (AC-05) — a test-only record or a mocked sce
+           nario is required for that case; this is flagged in Open Questions (OQ-03).
+      203
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 2 lines, removed 2 lines
+      208
+      209  | ID | Question | Tag | Assumption | Status |
+      210  |----|----------|-----|------------|--------|
+      211 -| OQ-01 | `health_plans` has two similar-looking code columns: `plan_code` and `ins_plan_code`. intent.md says "hea
+          -lth plan's `plan_code`" — is that literally the `plan_code` column, or was `ins_plan_code` intended? | [BLOCKING] |
+          - Assumed `plan_code` column on `health_plans`, matching intent.md's literal wording and matching `members.plan_code
+          -` values seen in seed data (e.g. `CIGNA`). | OPEN |
+      212 -| OQ-02 | intent.md requires "one DB record per check" for audit but does not specify a schema, table name, or rete
+          -ntion policy for this audit table. | [NON-BLOCKING] | Assumed a new additive `eligibility_checks` (or similar) audi
+          -t table is created via `database/init.sql`, following CLAUDE.md §2.1 EF Core entity conventions, storing only corre
+          -lationId, timestamp, patientId/healthPlanId (identifiers, not PHI per the CLAUDE.md §4.1 list), and result status.
+          -| OPEN |
+      211 +| OQ-01 | `health_plans` has two similar-looking code columns: `plan_code` and `ins_plan_code`. intent.md says "hea
+          +lth plan's `plan_code`" — is that literally the `plan_code` column, or was `ins_plan_code` intended? | [BLOCKING] |
+          + **RESOLVED from seed data, not just wording.** `database/init.sql` shows `health_plans.plan_code` values (`CIGNA`,
+          + `AETNA`, `UHC`, ...) exactly matching `members.plan_code` values, while `ins_plan_code` holds a distinct insurer b
+          +illing code (`CIG001`, `AET001`, `UHC001`, ...) that never appears on `members`. Confirmed: the match uses `health_
+          +plans.plan_code`. | RESOLVED |
+      212 +| OQ-02 | intent.md requires "one DB record per check" for audit but does not specify a schema, table name, or rete
+          +ntion policy for this audit table. Additionally, this repo has no EF migrations — does adding a table require a des
+          +tructive DB reset? | [NON-BLOCKING] → **RESOLVED** | Per CLAUDE.md's own "Backend commands" section (no migrations
+          +— edit `database/init.sql` directly, then reset the DB volume), the resolution is: add an `EligibilityCheck` EF ent
+          +ity + `eligibility_checks` table via `database/init.sql`, applied with `docker compose down -v && docker compose up
+          + -d`. Minimal schema: `id` (serial PK), `correlation_id` (uuid/text), `checked_at` (timestamptz), `patient_id` (tex
+          +t), `health_plan_id` (int, nullable — may not resolve), `status` (text: ELIGIBLE/INELIGIBLE/ERROR), `error_code` (t
+          +ext, nullable). No PHI fields per CLAUDE.md §4.1. See Constraint §6.9. | RESOLVED |
+      213  | OQ-03 | intent.md's INELIGIBLE definition includes "member.plan_code = NULL" but no seed member currently has a N
+           ULL `plan_code`, so AC-05 has no natural test record. | [NON-BLOCKING] | Assumed a test-only member row (or a unit
+           test with a mocked repository) will be used to exercise the NULL-plan_code path rather than modifying seed data. |
+           OPEN |
+      214  | OQ-04 | intent.md does not specify whether the match in "member.plan_code = health_plan.plan_code" is case-sensit
+           ive. Seed values are all upper-case, so this may never surface, but the comparison rule isn't stated. | [NON-BLOCKI
+           NG] | Assumed exact, case-sensitive string equality (ordinal comparison), consistent with EF Core LINQ default beha
+           vior and no normalization logic mentioned anywhere in the inputs. | OPEN |
+      215  | OQ-05 | intent.md's Success Criteria says "System returns ELIGIBLE, INELIGIBLE, or ERROR within 500ms" but doesn'
+           t state whether this is measured server-side (API response time) or end-to-end (including UI round-trip). | [NON-BL
+           OCKING] | Assumed server-side API response time (from request received to response sent), since that is what an ASP
+           .NET Core API can directly guarantee and test. | OPEN |
+
+● Update(Specs\member-eligibility\spec.md)
+  ⎿  Added 1 line
+      214  | OQ-04 | intent.md does not specify whether the match in "member.plan_code = health_plan.plan_code" is case-sensit
+           ive. Seed values are all upper-case, so this may never surface, but the comparison rule isn't stated. | [NON-BLOCKI
+           NG] | Assumed exact, case-sensitive string equality (ordinal comparison), consistent with EF Core LINQ default beha
+           vior and no normalization logic mentioned anywhere in the inputs. | OPEN |
+      215  | OQ-05 | intent.md's Success Criteria says "System returns ELIGIBLE, INELIGIBLE, or ERROR within 500ms" but doesn'
+           t state whether this is measured server-side (API response time) or end-to-end (including UI round-trip). | [NON-BL
+           OCKING] | Assumed server-side API response time (from request received to response sent), since that is what an ASP
+           .NET Core API can directly guarantee and test. | OPEN |
+      216  | OQ-06 | intent.md doesn't specify the HTTP method/route naming, only implies a check operation. CLAUDE.md §6 show
+           s the example route `POST /api/eligibility/check` directly, so this one is treated as settled rather than open — in
+           cluded here only for traceability. | [NON-BLOCKING] | Used `POST /api/eligibility/check` per CLAUDE.md §6's own wor
+           ked example. | RESOLVED |
+      217 +| OQ-07 | When both `patientId` and `healthPlanId` fail to resolve, which error code takes precedence? | [NON-BLOCK
+          +ING] → **RESOLVED** | Member-not-found (`MBR-001`) takes precedence, since the member is the primary subject of "me
+          +mber eligibility." Reflected in FR-04, §4.4, and AC-12. | RESOLVED |
+
+● All three blocking items are resolved and the spec is updated:
+
+  1. OQ-01 (plan_code vs ins_plan_code) — RESOLVED with data evidence: health_plans.plan_code matches members.plan_code's code space
+     (CIGNA, AETNA...); ins_plan_code is a different, non-matching insurer billing code.
+  2. New OQ-07 (member/plan-both-missing precedence) — RESOLVED: member-not-found (MBR-001) wins; reflected in FR-04, the error
+     table, and new AC-12/test row.
+  3. OQ-02 (audit table mechanism) — RESOLVED: follows CLAUDE.md's own documented no-migrations convention (edit database/init.sql,
+     reset via docker compose down -v && up -d); Constraint #9 was rewritten since it previously contradicted this. Added a minimal
+     eligibility_checks schema and Constraint #10 for naming conventions.
+
+  No more BLOCKING items remain in Section 9. The spec is ready to move to PLAN.md; the remaining NON-BLOCKING open questions
+  (OQ-03/04/05) are still open by design for the planning stage.
+
+✻ Worked for 1m 32s · done 1:29 PM
+
+※ recap: We're building the member eligibility spec for the PA app; I just resolved all blocking open questions and updated spec.md.
+  Next step is drafting PLAN.md from the finalized spec. (disable recaps in /config)
+
+> Read CLAUDE.md, Specs/member-eligibility/spec.md, and Specs/member-eligibility/risk-classification.md. Generate
+  Specs/member-eligibility/design-note.md. Use the structure from SDD_Templates/DESIGN-NOTE.md. Key decisions: - EF Core inline
+  controller — no separate service class (K2 simplicity); - Local DB lookup only. No external calls in Phase 1.; - PHI in request
+  input only — not stored raw, not logged; - EligibilityRecord: correlationId, status, checkedAt, dataSource only; - Audit log:
+  correlationId + status — no PHI fields; - Rollback: additive only — all changes removable without affecting existing features; -
+  Approval gates: tech lead + security per risk-classification.md
+
+  Read 4 files (ctrl+o to expand)
+
+● Write(Specs\member-eligibility\design-note.md)
+  ⎿  Wrote 117 lines to Specs\member-eligibility\design-note.md
+       1 # DESIGN-NOTE.md — Member Eligibility Check (Phase 1)
+       2 # Location : Specs/member-eligibility/design-note.md
+       3 # Committed : YES
+       4 # Status    : DRAFT
+       5 # Author    : Claude Code | Date: 2026-09-10
+       6 # Depends on: spec.md DRAFT (blocking questions resolved), risk-classification.md COMPLETE
+       7 #
+       8 # PURPOSE   : Capture the technical design decisions, security and
+       9 #             privacy considerations, audit implications, and approval
+      10 #             gates BEFORE task breakdown and implementation.
+     … +178 lines (ctrl+o to expand)
+
+● Created Specs/member-eligibility/design-note.md, built from the resolved spec.md, risk-classification.md, and your six key
+  decisions. Two things worth your attention before this moves to PLAN.md:
+
+  1. Audit schema is now narrower than spec.md. Your key decision — EligibilityRecord: correlationId, status, checkedAt, dataSource
+     only — excludes patientId/healthPlanId, but spec.md's already-resolved OQ-02 schema had included them. I flagged this explicitly
+     in the design note's Open Questions rather than silently editing spec.md; that reconciliation should happen before TASKS.md.
+  2. Approval gates conflict I surfaced: risk-classification.md's own risk answers say Security/Privacy review is required (PHI =
+     YES), but its checkbox gate list left Security unchecked. I followed your instruction and added Security as a gate here, and
+     left Privacy for the human reviewer to weigh in on.
+
+  Also noted as a deliberate deviation: the "no separate service class" decision supersedes spec.md's Constraint §6.3 (which had
+  assumed an AddScoped service) — this is consistent with the existing AuthorizationsController pattern already in the codebase, so
+  it's not out of step with prior art, just with the earlier spec draft.
+
+✻ Churned for 2m 38s · done 1:42 PM
+
+> /usage
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Settings  Status   Config   Usage   Stats
+
+  Session
+       4 # Status    : DRAFT
+       5 # Author    : Claude Code | Date: 2026-09-10
+       6 # Depends on: spec.md DRAFT (blocking questions resolved), risk-classification.md COMPLETE
+       7 #
+       8 # PURPOSE   : Capture the technical design decisions, security and
+       9 #             privacy considerations, audit implications, and approval
+      10 #             gates BEFORE task breakdown and implementation.
+     … +178 lines (ctrl+o to expand)
+
+● Created Specs/member-eligibility/design-note.md, built from the resolved spec.md, risk-classification.md, and your six key
+  decisions. Two things worth your attention before this moves to PLAN.md:
+
+  1. Audit schema is now narrower than spec.md. Your key decision — EligibilityRecord: correlationId, status, checkedAt, dataSource
+     only — excludes patientId/healthPlanId, but spec.md's already-resolved OQ-02 schema had included them. I flagged this explicitly
+     in the design note's Open Questions rather than silently editing spec.md; that reconciliation should happen before TASKS.md.
+  2. Approval gates conflict I surfaced: risk-classification.md's own risk answers say Security/Privacy review is required (PHI =
+     YES), but its checkbox gate list left Security unchecked. I followed your instruction and added Security as a gate here, and
+     left Privacy for the human reviewer to weigh in on.
+
+  Also noted as a deliberate deviation: the "no separate service class" decision supersedes spec.md's Constraint §6.3 (which had
+  assumed an AddScoped service) — this is consistent with the existing AuthorizationsController pattern already in the codebase, so
+  it's not out of step with prior art, just with the earlier spec draft.
+
+✻ Churned for 2m 38s · done 1:42 PM
+
+> /usage
+  ⎿  Settings dialog dismissed
+
+※ recap: We're spec-driven-developing the Member Eligibility feature: spec.md and design-note.md are done, with two flagged conflicts
+  (audit fields, approval gates) needing your call. Next step: resolve those, then write PLAN.md.
+
+> Read CLAUDE.md, Specs/member-eligibility/spec.md, and Specs/member-eligibility/design-note.md. Generate
+  Specs/member-eligibility/plan.md. Use the structure from sdd_templates_v2/PLAN.md. New files:
+  Controllers/EligibilityController.cs; Modify (additive only): Models/Entities.cs, DTOs/Dtos.cs, Data/PriorAuthDbContext.cs,
+  Program.cs. Do not touch: any existing controller, entity, or DTO. Dependency order: Step 1: Model Layer — Entities.cs + Dtos.cs
+  (no dependencies), Step 2: Data Layer  — PriorAuthDbContext.cs (depends on Step 1), Step 3: Controller  — EligibilityController.cs
+  (depends on 1+2). Verify: none of the non-goals from spec.md section 7 appear in this plan. All CLAUDE.md compliance rules
+  respected.
+
+  Searched for 1 pattern, read 3 files (ctrl+o to expand)
+
+● The user referenced sdd_templates_v2/PLAN.md, but that path doesn't exist — only SDD_Templates/PLAN.md does. I'll use that.
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(Specs\member-eligibility\plan.md)
+  ⎿  Wrote 221 lines to Specs\member-eligibility\plan.md
+       1 # PLAN.md — Member Eligibility Check (Phase 1)
+       2 # Location : Specs/member-eligibility/plan.md
+       3 # Committed : YES
+       4 # Status    : DRAFT
+       5 # Author    : Claude Code | Date: 2026-09-10
+       6 # Depends on: spec.md (blocking questions resolved), design-note.md DRAFT
+       7 #
+       8 # PURPOSE: Define HOW the feature will be built.
+       9 #          Answers: architecture decisions, file changes, data model, API design.
+      10 #          SPEC.md says what. PLAN.md says how.
+     … +270 lines (ctrl+o to expand)
+
+● Created Specs/member-eligibility/plan.md using SDD_Templates/PLAN.md (the referenced sdd_templates_v2/PLAN.md path doesn't exist in
+  this repo — flagged that substitution up front rather than guessing).
+
+  Key points to flag:
+
+  1. Program.cs discrepancy: You listed it as a file to modify, but design-note.md's "no separate service class" decision means
+     there's actually no AddScoped line to add — EligibilityController gets picked up automatically by the existing AddControllers().
+     I kept it in the file list as a verification-only entry rather than inventing an unneeded change, and called this out
+     explicitly in Section 8's constitution check.
+  2. database/init.sql added beyond your literal list — necessary because EligibilityCheck has no backing table otherwise; flagged as
+     the minimum needed to make your four listed files actually work, not scope creep.
+  3. Non-goals verification (as requested): all 6 non-goals from spec.md §7 checked individually in Section 8 — none appear in this
+     plan.
+  4. Frontend explicitly out of scope for this plan, per your file list — flagged as a known gap against spec.md AC-11/FR-08 in the
+     Risks table, so it doesn't get silently dropped.
+
+  Dependency order follows exactly what you specified (Model → Data → Controller). Next step would be TASKS.md, or resolving the
+  still-open spec.md items (OQ-03/04/05) before implementation starts.
+
+✻ Cogitated for 2m 9s · done 1:50 PM
+
+※ recap: We're doing spec-driven development for a Member Eligibility Check feature: intent, spec, design-note, and plan.md are all
+  done. Next step is writing TASKS.md to break the plan into executable implementation steps.
+
+> Read Specs/member-eligibility/spec.md, Specs/member-eligibility/design-note.md and Specs/member-eligibility/plan.md. Generate
+  Specs/member-eligibility/tasks.md. Use the structure from SDD_Templates/TASKS.md. Derive the tasks from the plan. Do not invent
+  beyond what the plan specifies. Each task must include: what file changes, pattern reference file, done condition (build passes),
+  and which AC it covers.
+
+  Read 4 files (ctrl+o to expand)
+
+● Write(Specs\member-eligibility\tasks.md)
+  ⎿  Wrote 300 lines to Specs\member-eligibility\tasks.md
+       1 # TASKS.md — Member Eligibility Check (Phase 1)
+       2 # Location : Specs/member-eligibility/tasks.md
+       3 # Committed : YES
+       4 # Status    : READY
+       5 # Author    : Claude Code | Date: 2026-09-10
+       6 # Depends on: plan.md DRAFT
+       7 #
+       8 # PURPOSE: Dependency-ordered, executable task list.
+       9 #          Each task is small enough for one Claude Code session.
+      10 #          Each task has a clear done condition.
+     … +308 lines (ctrl+o to expand)
+
+● Created Specs/member-eligibility/tasks.md, derived directly from plan.md's file list, data model, and request/response flow —
+  nothing invented beyond it.
+
+  Key structural choices, both traceable to plan.md rather than assumptions:
+
+  - Phase 4 (Frontend) has no tasks, just a deferred notice — plan.md's own Scope Note excludes frontend files, so generating
+    frontend tasks would have violated "do not invent beyond what the plan specifies." AC-11 is marked open/N/A throughout rather
+    than silently dropped.
+  - Task 3.2 ("verify Program.cs") is a verification task, not a code-change task — matches plan.md §2.2's finding that no AddScoped
+    line is actually needed under the no-service-layer decision.
+  - Every task carries: exact file path, a pattern-reference file to read first, a build-passes done condition (plus a runtime
+    condition for the DB/Program.cs tasks where build alone doesn't prove it worked), and the specific spec.md AC IDs it covers.
+  - Phase 5's AC table covers all 11 backend-relevant ACs (AC-01–AC-10, AC-12) plus AC-07 (manual timing) and AC-11 (marked
+    N/A/deferred), matching spec.md's actual AC numbering rather than the template's generic placeholders.
+
+  Next step per the template would be executing Phase 1, Task 1.1.
+
+✻ Worked for 1m 32s · done 1:56 PM
+
+> /sdd-analyze
+
+● === ANALYSIS REPORT ===
+
+  SPEC ↔ PLAN:
+
+  ACs with no task coverage:
+  - AC-11 (UI display in wizard step 4) — no task in tasks.md; Phase 4 (Frontend) is explicitly deferred/out of scope per plan.md's
+    Scope Note. Not an oversight, but genuinely uncovered.
+  - AC-05 (partial gap) — Task 3.1's logic covers the NULL-plan_code → INELIGIBLE branch, and Task 5.1 lists a verification row for
+    it, but no task actually creates the required test-only member with a NULL plan_code (spec.md OQ-03 is still OPEN — no seed
+    record exists). AC-05 cannot be executed as written without an additional task or manual DB insert that nobody currently owns.
+
+  FRs with no plan coverage (Step 2 also asks this at the FR level, not just AC level):
+  - FR-08 ("frontend shall surface the eligibility check... in wizard step 4") — not addressed anywhere in plan.md, consistent with
+    its Scope Note. Flagging per Step 2's instruction even though this is a deliberate, already-disclosed scope decision, not a
+    surprise.
+
+  Plan items not in spec:
+  - DataSource field on the EligibilityCheck/eligibility_checks audit record — introduced in design-note.md and carried into plan.md
+    §3.1/§4.2. spec.md's audit description (FR-06, §9 OQ-02) never mentions a dataSource field.
+  - Narrowed audit schema contradicts spec.md's own resolved Open Question. spec.md §9 OQ-02 is marked RESOLVED with a schema that
+    includes patient_id/health_plan_id, and spec.md §6 Constraint 9 references that same schema. plan.md §3.1 implements a schema
+    that excludes both fields (only correlationId/status/checkedAt/dataSource), per design-note.md's override. This is a live
+    inconsistency between two committed documents (spec.md still says one thing; plan.md and tasks.md build another) — spec.md was
+    never updated after design-note.md's decision, exactly as design-note.md's own Open Question 1 warned.
+
+  Scope creep in plan: NONE. Checked all 6 non-goals from spec.md §7 individually against plan.md and tasks.md (real-time API,
+  blocking submission, date-based eligibility, benefit-level eligibility, caching, RBAC/auth) — none appear in either document. This
+  matches plan.md's own §8 self-check.
+
+  ---
+
+  PLAN ↔ TASKS:
+
+  Files in plan with no task: NONE — every file in plan.md §2.1/§2.2 (EligibilityController.cs, Entities.cs, Dtos.cs,
+  PriorAuthDbContext.cs, Program.cs, database/init.sql) has a corresponding task (3.1; 1.1; 1.3/1.4; 2.1; 3.2; 1.2).
+
+  Minor traceability note (non-blocking): plan.md §2.2's "Existing Files — Modify" table has no "Pattern Reference" column (only §2.1
+  New Files does). tasks.md's Tasks 1.1/1.3/1.4/2.1 each invented a specific pattern-reference file (HealthPlan class,
+  CreateAuthorizationRequest, AuthorizationSummaryDto, Member DbSet). These are reasonable and consistent with CLAUDE.md §5/spec.md
+  Constraint §6.10, but they are tasks.md additions, not literally sourced from plan.md's modify-table.
+
+  Dependency order violations: NONE. Phase 1 (Model) → Phase 2 (Data, gated on Phase 1) → Phase 3 (Controller, gated on Phases 1+2)
+  exactly matches plan.md §6's Step 1→2→3 order.
+
+  Parallelisable tasks:
+  - Tasks 1.1 (Entities.cs), 1.2 (database/init.sql), and 1.3+1.4 (Dtos.cs) touch three independent files with no interdependency —
+    all parallelisable within Phase 1.
+  - Tasks 3.1 and 3.2 touch different files (EligibilityController.cs vs. Program.cs) but are not truly parallelisable: Task 3.2's
+    done-condition ("route appears in Swagger") depends on 3.1 being complete first, so the sequential ordering in tasks.md is
+    correct as written.
+
+  ---
+
+  CONSTITUTION COMPLIANCE:
+
+  Violations: NONE.
+  - Naming (§5): EligibilityController.cs, EligibilityCheckRequest/Response, EligibilityCheck entity — all conform.
+  - Route (§6): POST /api/eligibility/check matches CLAUDE.md's own literal worked example.
+  - DI (§7): no service introduced, so no AddScoped/AddSingleton/AddTransient/manual new — compliant by construction.
+  - PHI in logs (§4.1): Task 3.1's only log statement carries correlationId + exception type only; audit entity fields carry none of
+    CLAUDE.md's listed PHI fields.
+  - New packages (§9): none introduced.
+
+  Minor non-blocking note: EligibilityController doesn't pluralize the domain the way CLAUDE.md §5's literal example does
+  ([Domain]sController.cs → MembersController.cs). This isn't a fresh issue — it was a deliberate naming decision made in spec.md
+  Constraint §6.10 and applied consistently across design-note.md, plan.md, and tasks.md — just worth surfacing since it doesn't
+  match the table's literal pattern.
+
+  ---
+
+  OVERALL: ISSUES FOUND (none blocking for backend implementation to begin, but two should be resolved before Phase 5 verification is
+  considered complete)
+
+  Must be fixed before the feature can be called done:
+  1. Reconcile spec.md with plan.md's audit schema. Update spec.md §9 OQ-02 and §6 Constraint 9 to match the narrower
+     EligibilityCheck schema (drop patient_id/health_plan_id from the documented resolution, add dataSource) — otherwise spec.md and
+     plan.md permanently disagree on what was decided.
+  2. Add a task (or explicit manual step) that creates the NULL-plan_code test record needed for AC-05 — currently no task owns this,
+     so Task 5.1's AC-05 row cannot be executed as written.
+  3. Confirm AC-11/FR-08 stay tracked as a follow-up plan item — not a defect in this task set, but should not be silently forgotten
+     once Phase 1–3/5 are marked done.
+
+  Backend implementation (Phases 1–3) can proceed as-is — none of these three items block starting Task 1.1.
+
+  === END REPORT ===
+
+✻ Sautéed for 1m 37s · done 1:59 PM
+
+※ recap: We've been building the SDD spec chain for the member eligibility feature and just ran the spec/plan/tasks consistency
+  analysis. Next: reconcile spec.md's audit schema with plan.md, then add a test-data task for AC-05 before starting Phase 1
+  implementation.
+
+> Execute the model layer tasks from Specs/member-eligibility/tasks.md. Read Models/Entities.cs and DTOs/Dtos.cs as pattern
+  references first. Read Specs/member-eligibility/spec.md section 4 for field definitions. Rules: - Execute tasks in the order
+  listed in tasks.md; - After each task: stop and wait for the build hook result; - Only continue if build passes; - Add to existing
+  files only; — do not create new files; - Do not touch any other code
+
+  Read 4 files (ctrl+o to expand)
+
+● Starting Phase 1, Task 1.1 — adding the EligibilityCheck entity to Entities.cs.
+
+● Update(backend\PriorAuth.API\Models\Entities.cs)
+  ⎿  Added 19 lines
+      288
+      289      public DiagnosisCode? Diagnosis { get; set; }
+      290  }
+      291 +
+      292 +[Table("eligibility_checks")]
+      293 +public class EligibilityCheck
+      294 +{
+      295 +    [Key, Column("id")]
+      296 +    public int Id { get; set; }
+      297 +
+      298 +    [Column("correlation_id")]
+      299 +    public Guid CorrelationId { get; set; }
+      300 +
+      301 +    [Column("status")]
+      302 +    public string Status { get; set; } = string.Empty;
+      303 +
+      304 +    [Column("checked_at")]
+      305 +    public DateTime CheckedAt { get; set; } = DateTime.UtcNow;
+      306 +
+      307 +    [Column("data_source")]
+      308 +    public string DataSource { get; set; } = "LOCAL_DB";
+      309 +}
+
+● Task 1.1 edit applied. Running dotnet build to gate progression to Task 1.2.
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  Error: Exit code 1
+     MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 1 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (14472)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 2 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (14472)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 3 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (14472)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 4 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (14472)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 5 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (14472)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 6 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (14472)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+
+     … +18 lines (ctrl+o to expand)
+
+● Task 1.1's code change compiled fine, but dotnet build failed for an environmental reason, not a code error: a running
+  PriorAuth.API process (PID 14472 — likely a dotnet run session already active) is holding a lock on the output .exe, so MSBuild
+  can't copy the new build artifact.
+
+  Per the rule "only continue if build passes," I'm stopping here rather than proceeding to Task 1.2.
+
+● User answered Claude's questions:
+  ⎿  · The build failed because a running PriorAuth.API process (PID 14472) has the output .exe locked. How would you like to
+     proceed? → Stop that process, then rebuild
+
+● Bash(taskkill //PID 14472 //F)
+  ⎿  Error: Exit code 128
+     ERROR: The process "14472" not found.
+
+● Bash(tasklist //FI "IMAGENAME eq PriorAuth.API.exe"; echo "---"; tasklist //FI "IMAGENAME eq dotnet.exe")
+  ⎿  INFO: No tasks are running which match the specified criteria.
+     ---
+     … +3 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● PID 14472 is already gone. Retrying the build now.
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+  ⎿  Allowed by auto mode classifier
+
+● Build passed: 0 errors, 0 warnings. Marking Task 1.1 done and moving to Task 1.2 (database/init.sql).
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      71
+      72  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      73  **AC covered:** AC-08 (audit record schema), AC-09 (no PHI fields on the entity)
+      74 -**Status:** [ ] Done
+      74 +**Status:** [x] Done
+      75
+      76  ---
+      77
+
+  Read 1 file (ctrl+o to expand)
+
+● Appending the eligibility_checks table definition at the end of init.sql, in the transactional-tables style already used in this
+  file.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\database\init.sql)
+  ⎿  Added 10 lines
+      195  ('SITE003', 'Valley Surgical Center',   '2109876543', '21-0987654', 'Surgical',        'Orthopedics',     '300 Vall
+           ey Road',      NULL,       'Sacramento',  'CA', '94203', '916-555-3005', '916-555-3006', true,  'Y'),
+      196  ('SITE004', 'Bay Area Heart Institute', '3210987654', '32-1098765', 'Cardiology',      NULL,              '400 Bay
+           Bridge Blvd',  'Level 2',  'Oakland',     'CA', '94607', '510-555-3007', '510-555-3008', false, 'N'),
+      197  ('SITE005', 'Central Valley Hospital',  '4321098765', '43-2109876', 'Hospital',        'Multi-Specialty', '500 Cent
+           ral Ave',      NULL,       'Fresno',      'CA', '93721', '559-555-3009', '559-555-3010', true,  'Y');
+      198 +
+      199 +-- ─── AUDIT TABLES ────────────────────────────────────────────
+      200 +
+      201 +CREATE TABLE eligibility_checks (
+      202 +    id SERIAL PRIMARY KEY,
+      203 +    correlation_id UUID NOT NULL,
+      204 +    status VARCHAR(20) NOT NULL,
+      205 +    checked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      206 +    data_source VARCHAR(20) NOT NULL DEFAULT 'LOCAL_DB'
+      207 +);
+
+● Task 1.2's SQL edit is done, but its actual done-condition (per tasks.md) isn't dotnet build — it's applying the schema via docker
+  compose down -v && docker compose up -d, which is a destructive reset of the local dev database (wipes all current seeded/created
+  data, not just this feature's). Since that's a different kind of action than the C# build tasks, I want to confirm before running
+  it.
+
+● User answered Claude's questions:
+  ⎿  · Task 1.2 requires `docker compose down -v && docker compose up -d` to apply the new eligibility_checks table — this wipes the
+     current local Postgres volume (any data beyond the seed script is lost). Proceed? → Skip for now
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      93
+      94  **Done when:** `docker compose down -v && docker compose up -d` completes, `docker compose ps` shows `pa_db` healthy
+          , and the table exists in the running database
+      95  **AC covered:** AC-08 (backing store for the audit record)
+      96 -**Status:** [ ] Done
+      96 +**Status:** [~] SQL added to init.sql; DB reset/verification skipped by user request — pending before this task is f
+         +ully Done
+      97
+      98  ---
+      99
+
+● Continuing to Task 1.3 — adding EligibilityCheckRequest DTO to Dtos.cs.
+
+● Update(DTOs\Dtos.cs)
+  ⎿  Added 8 lines
+      110      string Description,
+      111      int Quantity
+      112  );
+      113 +
+      114 +// ─── ELIGIBILITY DTOs ───────────────────────────────────────────
+      115 +
+      116 +public record EligibilityCheckRequest(
+      117 +    string PatientId,
+      118 +    int HealthPlanId,
+      119 +    string? CorrelationId
+      120 +);
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+  ⎿  Allowed by auto mode classifier
+
+● Build passed. Marking Task 1.3 done and moving to Task 1.4 — EligibilityCheckResponse DTO.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      113
+      114  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      115  **AC covered:** AC-06 (request shape backs the 400-on-malformed-body check), AC-01, AC-02, AC-03, AC-04, AC-12 (req
+           uest shape required for every check call)
+      116 -**Status:** [ ] Done
+      116 +**Status:** [x] Done
+      117
+      118  ---
+      119
+
+● Update(DTOs\Dtos.cs)
+  ⎿  Added 10 lines
+      118      int HealthPlanId,
+      119      string? CorrelationId
+      120  );
+      121 +
+      122 +public record EligibilityCheckResponse(
+      123 +    string Status,
+      124 +    string PatientId,
+      125 +    int HealthPlanId,
+      126 +    string CorrelationId,
+      127 +    DateTime CheckedAt,
+      128 +    string? ErrorCode,
+      129 +    string? ErrorMessage
+      130 +);
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+  ⎿  Allowed by auto mode classifier
+
+● Build passed. Marking Task 1.4 done — Phase 1 (Model Layer) is complete.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      137
+      138  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      139  **AC covered:** AC-01, AC-02, AC-03, AC-04, AC-12 (response shape carries the `status`/`errorCode` fields these ACs
+            assert on)
+      140 -**Status:** [ ] Done
+      140 +**Status:** [x] Done
+      141
+      142  **→ Run /spec-review after this task.**
+      143
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      28
+      29  ## Progress
+      30
+      31 -- Phase 1 — Model Layer     : [ ] Not started
+      31 +- Phase 1 — Model Layer     : [~] Code complete (1.1, 1.3, 1.4 done, build passing); Task 1.2 DB reset/verification
+         +pending
+      32  - Phase 2 — Data Layer      : [ ] Not started
+      33  - Phase 3 — Controller      : [ ] Not started
+      34  - Phase 4 — Frontend        : DEFERRED — out of scope for this plan (see Scope Note)
+
+● Phase 1 (Model Layer) is done, with one caveat:
+
+  ┌──────┬───────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────┐
+  │ Task │                 File                  │                                    Result                                     │
+  ├──────┼───────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 1.1  │ Entities.cs — EligibilityCheck entity │ ✅ Build passed (0 errors, 0 warnings)                                        │
+  ├──────┼───────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 1.2  │ database/init.sql —                   │ SQL added; DB reset skipped per your choice, so the table doesn't exist in    │
+  │      │ eligibility_checks table              │ the running Postgres instance yet                                             │
+  ├──────┼───────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 1.3  │ Dtos.cs — EligibilityCheckRequest     │ ✅ Build passed                                                               │
+  ├──────┼───────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 1.4  │ Dtos.cs — EligibilityCheckResponse    │ ✅ Build passed                                                               │
+  └──────┴───────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────┘
+
+  One note along the way: the first build attempt failed on a file lock from a stray running process (PID 14472), unrelated to the
+  code change — I confirmed with you, killed it (it had already exited), and the rebuild succeeded cleanly.
+
+  Only existing files were touched (Entities.cs, DTOs/Dtos.cs, database/init.sql), all additive, no other code modified — as
+  instructed.
+
+  Before Phase 2 (Data Layer) can be meaningfully verified, Task 1.2's DB reset will eventually need to run — PriorAuthDbContext's
+  new DbSet<EligibilityCheck> will compile fine without it, but any runtime query against eligibility_checks will fail until the
+  table actually exists. Let me know when you'd like to run that reset, or if you want me to proceed to Phase 2 now and defer the
+  reset further.
+
+✻ Baked for 3m 11s · done 2:10 PM
+
+> /spec-review
+
+  Read 3 files (ctrl+o to expand)
+
+● === SPEC REVIEW ===
+
+  AC-01: NOT_YET — EligibilityController (Phase 3) not yet created; endpoint POST /api/eligibility/check does not exist
+  AC-02: NOT_YET — same, no controller/comparison logic exists yet
+  AC-03: NOT_YET — same
+  AC-04: NOT_YET — same
+  AC-05: NOT_YET — same; also no NULL-plan_code test record exists yet (spec.md OQ-03 still OPEN)
+  AC-06: NOT_YET — request validation logic lives in the controller, not yet written
+  AC-07: NOT_YET — nothing to time; no endpoint exists
+  AC-08: NOT_YET — EligibilityCheck entity exists (Entities.cs:292-309) and its table DDL exists in init.sql, but nothing writes to
+  it yet (no controller, no DbSet in PriorAuthDbContext.cs), and the table doesn't exist in the running DB (Task 1.2's docker compose
+  down -v reset was skipped per your earlier choice)
+  AC-09: NOT_YET — /hipaa-check not run against this feature; what exists so far (the EligibilityCheck entity: CorrelationId, Status,
+  CheckedAt, DataSource) contains no PHI fields, but "any generated code for this feature" isn't complete (no controller, no ILogger
+  calls yet)
+  AC-10: PASS — dotnet build run 3 times after Tasks 1.1/1.3/1.4, each time 0 errors, 0 warnings (confirmed this session)
+  AC-11: NOT_YET — frontend explicitly deferred/out of scope per plan.md's Scope Note
+  AC-12: NOT_YET — no controller, no precedence logic implemented yet
+
+  ---
+
+  Files generated/modified this session:
+
+  ┌──────────────────────────────────────────┬─────────────────────────────────────────┬─────────────────────────────────────────┐
+  │                   File                   │                 Change                  │                Traces to                │
+  ├──────────────────────────────────────────┼─────────────────────────────────────────┼─────────────────────────────────────────┤
+  │ backend/PriorAuth.API/Models/Entities.cs │ Appended EligibilityCheck class         │ AC-08 (schema), AC-09 (no PHI fields    │
+  │                                          │                                         │ present)                                │
+  ├──────────────────────────────────────────┼─────────────────────────────────────────┼─────────────────────────────────────────┤
+  │ backend/PriorAuth.API/DTOs/Dtos.cs       │ Appended EligibilityCheckRequest,       │ AC-01/02/03/04/06/12 (request/response  │
+  │                                          │ EligibilityCheckResponse                │ shape only — no logic yet)              │
+  ├──────────────────────────────────────────┼─────────────────────────────────────────┼─────────────────────────────────────────┤
+  │ database/init.sql                        │ Appended CREATE TABLE                   │ AC-08 (backing store; not yet applied — │
+  │                                          │ eligibility_checks                      │  DB reset pending)                      │
+  └──────────────────────────────────────────┴─────────────────────────────────────────┴─────────────────────────────────────────┘
+
+  No UNTRACED files — every change maps to a spec item.
+
+  ---
+
+  CONSTRAINTS:
+  1. Zero modification to existing controllers/services/entities — RESPECTED (verified: HealthPlan, Member, Provider, Site,
+     Authorization, etc. all untouched; EligibilityCheck appended after AuthorizationDiagnosis, Entities.cs:292)
+  2. Route convention (/api/[controller]) — N/A yet, no controller exists
+  3. AddScoped DI pattern — N/A yet, Program.cs untouched
+  4. EF Core LINQ only, no raw SQL — RESPECTED (the only SQL is init.sql's DDL, consistent with every other table in that file — no
+     application query code exists yet)
+  5. No PHI in ILogger calls — RESPECTED (trivially — no ILogger calls exist yet)
+  6. No hardcoded secrets — RESPECTED
+  7. No new packages — RESPECTED (no .csproj change)
+  8. Zero-warning build — RESPECTED (confirmed 3×)
+  9. Audit table via entity + init.sql, no modification to authorizations/members/health_plans — RESPECTED (verified full init.sql —
+     all existing CREATE TABLE/INSERT statements untouched)
+  10. Naming conventions — RESPECTED for what exists (EligibilityCheck, EligibilityCheckRequest, EligibilityCheckResponse);
+      EligibilityController.cs not yet created
+
+  SCOPE CREEP: NONE — scanned all 3 changed files against spec.md §7's 6 non-goals (real-time API, blocking submission, date-based
+  eligibility, benefit-level eligibility, caching, RBAC). None present. DataSource = "LOCAL_DB" is a literal, no HttpClient or
+  external call introduced.
+
+  SPEC GAPS:
+  - EligibilityCheck's actual schema conflicts with spec.md's own written resolution. spec.md §9 OQ-02 is marked RESOLVED with a
+    schema including patient_id, health_plan_id, and error_code (spec.md:212). The entity actually implemented (Entities.cs:292-309)
+    has only Id, CorrelationId, Status, CheckedAt, DataSource — omitting all three of those fields and adding an undocumented
+    DataSource field. This isn't a coding error — it correctly follows design-note.md's and plan.md's later, more specific override
+    of OQ-02 — but spec.md itself was never updated to match, so the committed spec and the committed code now disagree on paper.
+    This exact gap was already flagged in design-note.md's Open Question 1 and the prior /sdd-analyze report's Action Item #1, and
+    remains unresolved.
+
+  ACTION: Not ready for next phase yet — this is expected, since only Phase 1 (Model Layer) is complete. Two things worth doing
+  before Phase 3 (Controller) finishes and a final review is meaningful:
+  1. Update spec.md §9 OQ-02 and §6 Constraint 9 to match the schema actually implemented (drop patient_id/health_plan_id/error_code,
+     document data_source) — closes the standing spec/code conflict noted above.
+  2. Continue with Phase 2 (Data Layer) and Phase 3 (Controller) per tasks.md — AC-01 through AC-09 and AC-12 all remain NOT_YET
+     until EligibilityController exists.
+
+  === END ===
+
+✻ Churned for 1m 6s · done 2:11 PM
+
+※ recap: Building the member eligibility check feature via spec-driven development. Model layer (entities, DTOs) is done and builds
+  clean; next is Phase 2, wiring the EligibilityCheck entity into PriorAuthDbContext.
+
+> /usage
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Settings  Status   Config   Usage   Stats
+
+  Session
+
+  Total cost:            $3.35
+  external call introduced.
+
+  SPEC GAPS:
+  - EligibilityCheck's actual schema conflicts with spec.md's own written resolution. spec.md §9 OQ-02 is marked RESOLVED with a
+    schema including patient_id, health_plan_id, and error_code (spec.md:212). The entity actually implemented (Entities.cs:292-309)
+    has only Id, CorrelationId, Status, CheckedAt, DataSource — omitting all three of those fields and adding an undocumented
+    DataSource field. This isn't a coding error — it correctly follows design-note.md's and plan.md's later, more specific override
+    of OQ-02 — but spec.md itself was never updated to match, so the committed spec and the committed code now disagree on paper.
+    This exact gap was already flagged in design-note.md's Open Question 1 and the prior /sdd-analyze report's Action Item #1, and
+    remains unresolved.
+
+  ACTION: Not ready for next phase yet — this is expected, since only Phase 1 (Model Layer) is complete. Two things worth doing
+  before Phase 3 (Controller) finishes and a final review is meaningful:
+  1. Update spec.md §9 OQ-02 and §6 Constraint 9 to match the schema actually implemented (drop patient_id/health_plan_id/error_code,
+     document data_source) — closes the standing spec/code conflict noted above.
+  2. Continue with Phase 2 (Data Layer) and Phase 3 (Controller) per tasks.md — AC-01 through AC-09 and AC-12 all remain NOT_YET
+     until EligibilityController exists.
+
+  === END ===
+
+✻ Churned for 1m 6s · done 2:11 PM
+
+※ recap: Building the member eligibility check feature via spec-driven development. Model layer (entities, DTOs) is done and builds
+  clean; next is Phase 2, wiring the EligibilityCheck entity into PriorAuthDbContext.
+
+> /usage
+  ⎿  Settings dialog dismissed
+
+> please recreate spec.md and plan.md
+
+● "Recreate" is ambiguous here — I want to make sure I don't overwrite the resolved open questions and constraints we've built up.
+
+● User answered Claude's questions:
+  ⎿  · Do you want spec.md and plan.md regenerated from scratch (re-run the original generation process against
+     intent.md/CLAUDE.md/design-note.md), or just updated to fix the specific inconsistency spec-review found (the EligibilityCheck
+     audit schema in spec.md doesn't match what's actually implemented)? → Targeted fix only (Recommended)
+
+● Making the targeted fix — updating spec.md's OQ-02 (and the plan.md note that flagged it) to match what's actually implemented in
+  Entities.cs/init.sql, without touching anything else.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\spec.md)
+  ⎿  Added 1 line, removed 1 line
+      209  | ID | Question | Tag | Assumption | Status |
+      210  |----|----------|-----|------------|--------|
+      211  | OQ-01 | `health_plans` has two similar-looking code columns: `plan_code` and `ins_plan_code`. intent.md says "hea
+           lth plan's `plan_code`" — is that literally the `plan_code` column, or was `ins_plan_code` intended? | [BLOCKING] |
+            **RESOLVED from seed data, not just wording.** `database/init.sql` shows `health_plans.plan_code` values (`CIGNA`,
+            `AETNA`, `UHC`, ...) exactly matching `members.plan_code` values, while `ins_plan_code` holds a distinct insurer b
+           illing code (`CIG001`, `AET001`, `UHC001`, ...) that never appears on `members`. Confirmed: the match uses `health_
+           plans.plan_code`. | RESOLVED |
+      212 -| OQ-02 | intent.md requires "one DB record per check" for audit but does not specify a schema, table name, or rete
+          -ntion policy for this audit table. Additionally, this repo has no EF migrations — does adding a table require a des
+          -tructive DB reset? | [NON-BLOCKING] → **RESOLVED** | Per CLAUDE.md's own "Backend commands" section (no migrations
+          -— edit `database/init.sql` directly, then reset the DB volume), the resolution is: add an `EligibilityCheck` EF ent
+          -ity + `eligibility_checks` table via `database/init.sql`, applied with `docker compose down -v && docker compose up
+          - -d`. Minimal schema: `id` (serial PK), `correlation_id` (uuid/text), `checked_at` (timestamptz), `patient_id` (tex
+          -t), `health_plan_id` (int, nullable — may not resolve), `status` (text: ELIGIBLE/INELIGIBLE/ERROR), `error_code` (t
+          -ext, nullable). No PHI fields per CLAUDE.md §4.1. See Constraint §6.9. | RESOLVED |
+      212 +| OQ-02 | intent.md requires "one DB record per check" for audit but does not specify a schema, table name, or rete
+          +ntion policy for this audit table. Additionally, this repo has no EF migrations — does adding a table require a des
+          +tructive DB reset? | [NON-BLOCKING] → **RESOLVED — IMPLEMENTED** | Per CLAUDE.md's own "Backend commands" section (
+          +no migrations — edit `database/init.sql` directly, then reset the DB volume), the resolution is: add an `Eligibilit
+          +yCheck` EF entity + `eligibility_checks` table via `database/init.sql`, applied with `docker compose down -v && doc
+          +ker compose up -d`. **Schema (as implemented in `Models/Entities.cs` and `database/init.sql`):** `id` (serial PK),
+          +`correlation_id` (uuid), `status` (text: ELIGIBLE/INELIGIBLE/ERROR), `checked_at` (timestamptz), `data_source` (tex
+          +t, default `LOCAL_DB` — reserved for `PAYER_API` in Phase 2). Deliberately excludes `patient_id`, `health_plan_id`,
+          + and `error_code` — narrowed per design-note.md's "Data Handling Design" decision, to minimize any identity-linkabl
+          +e data in the audit trail. No PHI fields per CLAUDE.md §4.1. See Constraint §6.9. | RESOLVED |
+      213  | OQ-03 | intent.md's INELIGIBLE definition includes "member.plan_code = NULL" but no seed member currently has a N
+           ULL `plan_code`, so AC-05 has no natural test record. | [NON-BLOCKING] | Assumed a test-only member row (or a unit
+           test with a mocked repository) will be used to exercise the NULL-plan_code path rather than modifying seed data. |
+           OPEN |
+      214  | OQ-04 | intent.md does not specify whether the match in "member.plan_code = health_plan.plan_code" is case-sensit
+           ive. Seed values are all upper-case, so this may never surface, but the comparison rule isn't stated. | [NON-BLOCKI
+           NG] | Assumed exact, case-sensitive string equality (ordinal comparison), consistent with EF Core LINQ default beha
+           vior and no normalization logic mentioned anywhere in the inputs. | OPEN |
+      215  | OQ-05 | intent.md's Success Criteria says "System returns ELIGIBLE, INELIGIBLE, or ERROR within 500ms" but doesn'
+           t state whether this is measured server-side (API response time) or end-to-end (including UI round-trip). | [NON-BL
+           OCKING] | Assumed server-side API response time (from request received to response sent), since that is what an ASP
+           .NET Core API can directly guarantee and test. | OPEN |
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\plan.md)
+  ⎿  Added 1 line, removed 1 line
+       94  }
+       95  ```
+       96
+       97 -No `patientId`, `healthPlanId`, or `errorCode` columns — narrowed audit schema per design-note.md §"Data Handling D
+          -esign" (supersedes spec.md OQ-02's earlier draft schema). No navigation properties, no FK relationships — this tabl
+          -e stands alone.
+       97 +No `patientId`, `healthPlanId`, or `errorCode` columns — narrowed audit schema per design-note.md §"Data Handling D
+          +esign". spec.md §9 OQ-02 has been updated to match this schema. No navigation properties, no FK relationships — thi
+          +s table stands alone.
+       98
+       99  ### 3.2 Database Migration
+      100
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\plan.md)
+  ⎿  Error editing file
+
+● That text is actually in design-note.md, not plan.md. Let me fix it there.
+          hPlanId)`) and the resulting plan-code comparison (`member.PlanCode == healthPlan.PlanCode`, ordinal string equality
+           — resolved field per spec.md OQ-01). They are never passed to `ILogger`, never written to a file, and never persist
+          ed into the audit record. Per the key decision **"PHI in request input only — not stored raw, not logged"**, they ar
+          e permitted to be echoed back in the synchronous HTTP response body (spec.md §4.3), since that response returns dire
+          ctly to the same wizard session that submitted it — it is not a log, and not a persistent store.
+      53  - **EF Core LINQ only, no raw SQL** (CLAUDE.md §2.1/§3.1, spec.md Constraint §6.4) — both lookups are `FindAsync` pr
+          imary-key reads; the comparison is an in-memory equality check, not a SQL join.
+      54  - **Audit persistence — narrowed per key decision:** the `EligibilityCheck` entity stores **only** `CorrelationId` (
+          Guid), `Status` (string: `ELIGIBLE`/`INELIGIBLE`/`ERROR`), `CheckedAt` (UTC timestamp), and `DataSource` (string, `"
+          LOCAL_DB"` for Phase 1 — reserved for `"PAYER_API"` in Phase 2). It does **not** store `patientId`, `healthPlanId`,
+          `errorCode`, or any name/demographic field.
+      55 -  - **This is narrower than spec.md OQ-02's resolved schema**, which had proposed including `patient_id`/`health_pla
+         -n_id` in `eligibility_checks` for traceability. This design note's schema takes precedence per this task's explicit
+         -instruction; spec.md §9 OQ-02 and §6 Constraint 9 should be updated to match (see Open Questions).
+      55 +  - spec.md §9 OQ-02 has been updated to match this schema (it previously proposed including `patient_id`/`health_pl
+         +an_id` in `eligibility_checks` for traceability; that draft no longer appears in spec.md).
+      56  - **DataSource field** is new relative to spec.md — it is not in the spec's API contract or audit description. It ex
+          ists purely on the audit record (not in the API response) to make Phase 1 vs. Phase 2 checks distinguishable in the
+          audit trail once real-time payer calls are added.
+      57
+      58  ---
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● That's just the one reference I already updated (§3.1's note). Both documents are now consistent — the targeted fix is complete.
+
+  What changed:
+  - spec.md §9 OQ-02 — updated to state the schema as actually implemented (id, correlation_id, status, checked_at, data_source),
+    explicitly noting patient_id/health_plan_id/error_code are deliberately excluded, and marked RESOLVED — IMPLEMENTED.
+  - plan.md §3.1 — note now says spec.md has been updated to match, rather than "supersedes" (which implied an unresolved conflict).
+  - design-note.md — Open Question 1 marked resolved (struck through), and the "Data Handling Design" section's cross-reference
+    updated to match.
+
+  Nothing else in either document referenced the old schema, so no other changes were needed. Entities.cs, Dtos.cs, and init.sql were
+  not touched — the code was already correct; only the spec/plan documentation needed to catch up to it, per spec-review's finding.
+
+✻ Cooked for 1m 26s · done 2:23 PM
+
+> recreate tasks.md from updated plan.md
+
+● plan.md's content is functionally unchanged (only one clarifying sentence in §3.1 was edited), but note: Phase 1 tasks have already
+  been executed in this session (1.1, 1.3, 1.4 done; 1.2 partially done — SQL added, DB reset pending). I'll regenerate the task
+  list from plan.md but preserve that real completion status rather than resetting it to "not started," since that would misrepresent
+  the actual state of the code.
+
+● Write(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 15 lines, removed 9 lines
+      1  # TASKS.md — Member Eligibility Check (Phase 1)
+      2  # Location : Specs/member-eligibility/tasks.md
+      3  # Committed : YES
+      4 -# Status    : READY
+      4 +# Status    : IN PROGRESS
+      5  # Author    : Claude Code | Date: 2026-09-10
+      6 -# Depends on: plan.md DRAFT
+      6 +# Depends on: plan.md DRAFT (§3.1 note updated to reflect spec.md OQ-02 sync)
+      7  #
+      8  # PURPOSE: Dependency-ordered, executable task list.
+      9  #          Each task is small enough for one Claude Code session.
+     ...
+      20
+      21  ---
+      22
+      23 +## Regeneration Note
+      24 +
+      25 +This file was regenerated from the current plan.md (2026-09-10). plan.md's substance is unchanged from the version t
+         +his file was originally derived from — only its §3.1 note was edited to reflect that spec.md §9 OQ-02 now matches th
+         +e implemented audit schema. Task content below is therefore identical to the prior tasks.md, **except** that Phase 1
+         +'s completion status is carried forward from the actual state of the code (Tasks 1.1/1.3/1.4 already executed and bu
+         +ild-verified this session; Task 1.2 partially done) — regenerating this file does not roll back real progress alread
+         +y made.
+      26 +
+      27 +---
+      28 +
+      29  ## Scope Note
+      30
+      31  plan.md is backend-only (see its Scope Note). Phase 4 (Frontend) is therefore listed as **deferred / out of scope**,
+           not as executable tasks — generating frontend tasks here would invent work beyond what plan.md specifies. spec.md A
+          C-11 cannot be closed until a follow-up plan covers `api/client.ts`, `types/index.ts`, and `NewAuthorizationPage.tsx
+          `.
+     ...
+      73      public string DataSource { get; set; } = "LOCAL_DB";
+      74  }
+      75  ```
+      70 -(plan.md §3.1 — exact schema, no `patientId`/`healthPlanId`/`errorCode` columns)
+      76 +(plan.md §3.1 — exact schema, no `patientId`/`healthPlanId`/`errorCode` columns; matches spec.md §9 OQ-02)
+      77
+      78  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      79  **AC covered:** AC-08 (audit record schema), AC-09 (no PHI fields on the entity)
+      74 -**Status:** [x] Done
+      80 +**Status:** [x] Done — build verified 0 errors/0 warnings
+      81
+      82  ---
+      83
+     ...
+      119
+      120  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      121  **AC covered:** AC-06 (request shape backs the 400-on-malformed-body check), AC-01, AC-02, AC-03, AC-04, AC-12 (req
+           uest shape required for every check call)
+      116 -**Status:** [x] Done
+      122 +**Status:** [x] Done — build verified 0 errors/0 warnings
+      123
+      124  ---
+      125
+     ...
+      143
+      144  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      145  **AC covered:** AC-01, AC-02, AC-03, AC-04, AC-12 (response shape carries the `status`/`errorCode` fields these ACs
+            assert on)
+      140 -**Status:** [x] Done
+      146 +**Status:** [x] Done — build verified 0 errors/0 warnings
+      147
+      142 -**→ Run /spec-review after this task.**
+      148 +**→ Run /spec-review after this task.** (Already run this session — see spec-review report: AC-10 PASS, all others
+          +NOT_YET pending Phase 2/3.)
+      149
+      150  ---
+      151
+      152  ## Phase 2 — Data Layer
+      147 -*Depends on: Phase 1 complete*
+      153 +*Depends on: Phase 1 complete (Task 1.2's DB reset still pending — see note below)*
+      154  *Pattern reference: read `PriorAuthDbContext.cs` before starting (plan.md §2.2)*
+      155
+      156  ---
+     ...
+      257  | AC-06 | missing patientId or healthPlanId | HTTP 400 | [ ] |
+      258  | AC-08 | any valid or ERROR check | One `eligibility_checks` row written with correlationId, status, checkedAt, da
+           taSource | [ ] |
+      259  | AC-09 | any generated code for this feature | `/hipaa-check` returns COMPLIANT | [ ] |
+      254 -| AC-10 | all code changes | `dotnet build` — zero errors, zero warnings | [ ] |
+      260 +| AC-10 | all code changes | `dotnet build` — zero errors, zero warnings | [x] Verified 3× this session |
+      261  | AC-12 | patientId `PT999999` AND healthPlanId `9999` (both unknown) | HTTP 200, status ERROR, errorCode MBR-001 (
+           precedence) | [ ] |
+      262  | AC-11 | N/A — frontend deferred, see Phase 4 | Not testable until follow-up plan | [ ] N/A |
+      263  | AC-07 | any valid check | Response returned within 500ms (manual timing) | [ ] |
+
+● tasks.md regenerated from the current plan.md. Since plan.md's actual content didn't materially change (only a clarifying note),
+  the task list itself is unchanged — but I preserved the real progress already made rather than resetting it:
+
+  - Tasks 1.1, 1.3, 1.4 — still marked done (build-verified 0 errors/0 warnings, 3×)
+  - Task 1.2 — still marked partial (SQL added to init.sql, DB reset/verification pending per your earlier choice)
+  - Phases 2–5 — still not started
+
+  Added a "Regeneration Note" at the top explaining why completion status was carried forward instead of reset, so this isn't
+✻ Cooked for 1m 5s · done 2:27 PM
+
+> run all phases
+
+  Read 3 files (ctrl+o to expand)
+
+● Executing Task 2.1 — registering EligibilityCheck in PriorAuthDbContext.cs, matching the existing => Set<T>() expression-bodied
+  pattern already used for every other DbSet.
+
+● Update(Data\PriorAuthDbContext.cs)
+  ⎿  Added 1 line
+      16      public DbSet<Authorization> Authorizations => Set<Authorization>();
+      17      public DbSet<AuthorizationProcedure> AuthorizationProcedures => Set<AuthorizationProcedure>();
+      18      public DbSet<AuthorizationDiagnosis> AuthorizationDiagnoses => Set<AuthorizationDiagnosis>();
+      19 +    public DbSet<EligibilityCheck> EligibilityChecks => Set<EligibilityCheck>();
+      20
+      21      protected override void OnModelCreating(ModelBuilder modelBuilder)
+      22      {
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  Error: Exit code 1
+     MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 1 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (11172)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 2 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (11172)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 3 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (11172)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 4 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (11172)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 5 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (11172)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+     C:\Program Files\dotnet\sdk\8.0.100\Microsoft.Common.CurrentVersion.targets(5198,5): warning MSB3026: Could not copy
+     "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\obj\Debug\net8.0\apphost.exe" to
+     "bin\Debug\net8.0\PriorAuth.API.exe". Beginning retry 6 in 1000ms. The process cannot access the file
+     'C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\bin\Debug\net8.0\PriorAuth.API.exe' because it is
+     being used by another process. The file is locked by: "PriorAuth.API (11172)"
+     [C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\PriorAuth.API.csproj]
+
+     … +18 lines (ctrl+o to expand)
+
+● Same file-lock pattern as before (a different PID this time — something appears to be auto-restarting the API). Since you already
+  approved this exact fix once this session, I'll clear it the same way.
+
+● Bash(taskkill //PID 11172 //F 2>&1; echo "---"; tasklist //FI "IMAGENAME eq PriorAuth.API.exe")
+  ⎿  SUCCESS: The process with PID 11172 has been terminated.
+     ---
+     INFO: No tasks are running which match the specified criteria.
+  ⎿  Allowed by auto mode classifier
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+  ⎿  Allowed by auto mode classifier
+
+● Build passed. Task 2.1 done — Phase 2 complete. Marking it and moving to Phase 3, Task 3.1 (the controller).
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      168
+      169  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      170  **AC covered:** AC-08 (audit persistence path)
+      171 -**Status:** [ ] Done
+      171 +**Status:** [x] Done — build verified 0 errors/0 warnings
+      172
+      173  **→ Run /spec-review after this task.**
+      174
+
+  Read 1 file (ctrl+o to expand)
+
+● Now Task 3.1 — creating EligibilityController.cs, following AuthorizationsController.cs's constructor-injection/hand-mapped-DTO
+  style exactly.
+
+● Write(Controllers\EligibilityController.cs)
+  ⎿  Wrote 102 lines to Controllers\EligibilityController.cs
+       1 using Microsoft.AspNetCore.Mvc;
+       2 using Microsoft.EntityFrameworkCore;
+       3 using PriorAuth.API.Data;
+       4 using PriorAuth.API.DTOs;
+       5 using PriorAuth.API.Models;
+       6
+       7 namespace PriorAuth.API.Controllers;
+       8
+       9 [ApiController]
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet build 2>&1)
+  ⎿  MSBuild version 17.8.3+195e7f5a3 for .NET
+       Determining projects to restore...
+       All projects are up-to-date for restore.
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+  ⎿  Allowed by auto mode classifier
+
+● Build passed clean on the first try. Task 3.1 done. Now Task 3.2 — verifying Program.cs needs no change and that dotnet run starts
+  cleanly with the route registered.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      207
+      208  **Done when:** `dotnet build` passes with zero errors, zero warnings
+      209  **AC covered:** AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-08, AC-09, AC-12
+      210 -**Status:** [ ] Done
+      210 +**Status:** [x] Done — build verified 0 errors/0 warnings
+      211
+      212  ---
+      213
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API" && dotnet run 2>&1)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  Allowed by auto mode classifier
+
+● Bash(sleep 8 && curl -s http://localhost:5000/swagger/v1/swagger.json | grep -o "eligibility[^\"]*" | sort -u)
+  ⎿  (No output)
+  ⎿  (timeout 30s)
+  ⎿  Allowed by auto mode classifier
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(curl -s http://localhost:5000/swagger/v1/swagger.json -o /tmp_swagger.json 2>&1; curl -s -w "\nHTTP_STATUS:%{http_code}\n"
+      http://localhost:5000/swagger/v1/swag…)
+  ⎿  ": {
+                 "type": "string",
+                 "nullable": true
+     … +87 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● Swagger is up (HTTP 200). Now checking specifically for the eligibility path.
+
+● Bash(curl -s http://localhost:5000/swagger/v1/swagger.json | python -c "import json,sys; d=json.load(sys.stdin); print([p for p in
+      d['paths'] if 'eligibility' in p.l…)
+  ⎿  ['/api/Eligibility/check']
+  ⎿  Allowed by auto mode classifier
+
+● POST /api/Eligibility/check is registered and appears in Swagger with no Program.cs edit — confirming plan.md's no-service-layer
+  decision holds. Stopping the dev server now that verification is done.
+
+● Bash(tasklist //FI "IMAGENAME eq PriorAuth.API.exe")
+  ⎿  Image Name                     PID Session Name        Session#    Mem Usage
+     ========================= ======== ================ =========== ============
+     PriorAuth.API.exe             3200 Console                   11     78,848 K
+  ⎿  Allowed by auto mode classifier
+
+● Before running Phase 5's runtime AC verification, there's a real blocker: Task 1.2's DB reset (creating the eligibility_checks
+  table) was skipped earlier. Let me confirm this actually breaks the endpoint before asking you about it again.
+
+● Bash(curl -s -w "\nHTTP_STATUS:%{http_code}\n" -X POST http://localhost:5000/api/eligibility/check -H "Content-Type:
+      application/json" -d "{\"patientId\":\"PT001234\…)
+  ⎿  {
+       "status": "ERROR",
+       "patientId": "PT001234",
+     … +7 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● Confirmed — every call currently fails with SYS-001 because eligibility_checks doesn't exist in the running database yet. Phase 5's
+  runtime AC verification (AC-01, 02, 03, 04, 08, 12, etc.) cannot produce correct results until that table exists.
+
+● User answered Claude's questions:
+  ⎿  · Phase 5 runtime verification requires the eligibility_checks table, which needs the DB reset (docker compose down -v && up -d)
+     skipped earlier. Proceed with it now so Phase 5 can actually run? → Yes, reset now (Recommended)
+
+● Bash(cd "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo" && docker compose down -v && docker compose up -d)
+  ⎿  Error: Exit code 127
+     /usr/bin/bash: line 1: docker: command not found
+
+● Bash(where docker 2>&1; echo "---"; ls "/c/Program Files/Docker/Docker/resources/bin/" 2>&1 | head; echo "---"; tasklist //FI
+      "IMAGENAME eq Docker Desktop.exe" 2>&1)
+  ⎿  INFO: Could not find files for the given pattern(s).
+     ---
+     ls: cannot access '/c/Program Files/Docker/Docker/resources/bin/': No such file or directory
+     … +2 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● Bash(netstat -ano | grep ":5432"; echo "---"; tasklist //FI "IMAGENAME eq postgres.exe" 2>&1; echo "---docker desktop check---"; ls
+      "/c/Program Files/Docker" 2>&1)
+  ⎿  Error: Exit code 2
+       TCP    0.0.0.0:5432           0.0.0.0:0              LISTENING       8988
+       TCP    127.0.0.1:5432         127.0.0.1:55304        ESTABLISHED     8988
+       TCP    127.0.0.1:55304        127.0.0.1:5432         ESTABLISHED     3200
+       TCP    [::]:5432              [::]:0                 LISTENING       8988
+     ---
+
+     Image Name                     PID Session Name        Session#    Mem Usage
+     ========================= ======== ================ =========== ============
+     postgres.exe                  8988 Services                   0     23,760 K
+     … +10 lines (ctrl+o to expand)
+
+● Bash(where psql 2>&1; echo "---appsettings---"; cat
+      "C:\Users\JaswantSinghB\Downloads\sdd_demo\sdd_demo\backend\PriorAuth.API\appsettings.json" 2>&1)
+  ⎿  INFO: Could not find files for the given pattern(s).
+     ---appsettings---
+     {
+     … +11 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Found it — this environment actually runs Postgres as a native Windows service, not via Docker (Docker isn't even installed here).
+  The docker compose down -v && up -d step from CLAUDE.md/tasks.md doesn't apply to this machine. I'll apply the eligibility_checks
+  table directly via psql instead — which is actually less destructive since it won't wipe existing data.
+
+● Bash(export PGPASSWORD=password_123
+      "/c/Program Files/PostgreSQL/14/bin/psql.exe" -h localhost -p 5432 -U postgres -d priorauth -c "\dt" 2>&1)
+  ⎿                    List of relations
+      Schema |           Name           | Type  |  Owner
+     --------+--------------------------+-------+----------
+     … +10 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● Confirmed — 9 existing tables, no eligibility_checks yet. Applying just that table now.
+
+● Bash(export PGPASSWORD=password_123
+      "/c/Program Files/PostgreSQL/14/bin/psql.exe" -h localhost -p 5432 -U postgres -d priorauth -c "…)
+  ⎿  CREATE TABLE
+  ⎿  Allowed by auto mode classifier
+
+● Table created. Now retesting the endpoint that previously failed.
+
+● Bash(curl -s -w "\nHTTP_STATUS:%{http_code}\n" -X POST http://localhost:5000/api/eligibility/check -H "Content-Type:
+      application/json" -d "{\"patientId\":\"PT001234\…)
+  ⎿  {
+       "status": "ELIGIBLE",
+       "patientId": "PT001234",
+     … +7 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● AC-01 passes. Now running through the rest of Phase 5's runtime AC verification table.
+
+● Bash(echo "=== AC-02: INELIGIBLE (PT001235/AETNA vs plan1 CIGNA) ==="
+      curl -s -w "\nHTTP_STATUS:%{http_code}\n" -X POST http://localhost:5000/api/eligibility/check -…)
+  ⎿  === AC-02: INELIGIBLE (PT001235/AETNA vs plan1 CIGNA) ===
+     {
+       "status": "INELIGIBLE",
+     … +48 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● All pass exactly as spec.md's Test Data table (§8) predicted. Now checking AC-08 (audit record written) and AC-07 (response time).
+
+● Bash(export PGPASSWORD=password_123
+      "/c/Program Files/PostgreSQL/14/bin/psql.exe" -h localhost -p 5432 -U postgres -d priorauth -c "SELECT id, correlation_id,
+      status…)
+  ⎿   id |            correlation_id            |   status   |            checked_at            | data_source
+     ----+--------------------------------------+------------+----------------------------------+-------------
+       1 | 45cd042c-dedd-4866-8741-23adf7ca7d5f | ELIGIBLE   | 2026-09-10 14:35:23.989398+05:30 | LOCAL_DB
+     … +5 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● Bash(curl -s -o /dev/null -w "HTTP %{http_code}, total time: %{time_total}s\n" -X POST http://localhost:5000/api/eligibility/check
+      -H "Content-Type: application/json…)
+  ⎿  HTTP 200, total time: 0.010897s
+  ⎿  Allowed by auto mode classifier
+
+● AC-05 has no natural test record (no seed member has a NULL plan_code — spec.md OQ-03). I'll create a temporary test-only member,
+  verify, then clean it up immediately so it doesn't pollute seed data.
+
+● Bash(export PGPASSWORD=password_123
+      "/c/Program Files/PostgreSQL/14/bin/psql.exe" -h localhost -p 5432 -U postgres -d priorauth -c "…)
+  ⎿  INSERT 0 1
+  failed: {CorrelationId} {ExceptionType}", correlationId, ex.GetType().Name). Arguments are a GUID and an exception type name —
+  neither is on the PHI field list.
+
+  Step 2 — Hardcoded credentials: None of the 4 files contain a connection string, API key, or password literal. ("LOCAL_DB" is a
+  data-source label, not a credential.)
+
+  Step 3 — Audit entries: The feature's audit mechanism is a DB row (EligibilityCheck/eligibility_checks), not an ILogger call —
+  ILogger is used only for the unhandled-exception path. Checked against that DB record instead:
+  - One record per completed check? YES — written once per request that passes validation (verified live: 5 test calls → 5 rows; the
+    400/malformed-body case correctly writes none, since no check was actually performed)
+  - Contains correlationId (not patient ID)? YES — correlation_id only; no patient_id/health_plan_id column exists on this table
+  - Contains operation result? YES — status (ELIGIBLE/INELIGIBLE/ERROR)
+  - Contains NO PHI field? YES — columns are id, correlation_id, status, checked_at, data_source only
+
+  HIPAA_VIOLATIONS:     NONE
+  CREDENTIAL_EXPOSURE:  NONE
+  AUDIT_GAPS:           NONE
+
+  OVERALL: COMPLIANT
+  === END ===
+
+  That closes out AC-09. Updating tasks.md's Phase 5 table with all the verified results.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 13 lines, removed 13 lines
+      249
+      250  | AC | Test Input | Expected | Pass? |
+      251  |----|------------|----------|-------|
+      252 -| AC-01 | patientId `PT001234`, healthPlanId `1` (Cigna, plan_code=CIGNA) | HTTP 200, status ELIGIBLE | [ ] |
+      253 -| AC-02 | patientId `PT001235`, healthPlanId `1` (Cigna, plan_code=CIGNA) | HTTP 200, status INELIGIBLE | [ ] |
+      254 -| AC-03 | patientId `PT999999` (unknown), healthPlanId `1` | HTTP 200, status ERROR, errorCode MBR-001 | [ ] |
+      255 -| AC-04 | patientId `PT001234`, healthPlanId `9999` (unknown) | HTTP 200, status ERROR, errorCode PLN-001 | [ ] |
+      256 -| AC-05 | member with NULL plan_code (test-only record, per spec.md OQ-03) vs any health plan | HTTP 200, status IN
+          -ELIGIBLE | [ ] |
+      257 -| AC-06 | missing patientId or healthPlanId | HTTP 400 | [ ] |
+      258 -| AC-08 | any valid or ERROR check | One `eligibility_checks` row written with correlationId, status, checkedAt, da
+          -taSource | [ ] |
+      259 -| AC-09 | any generated code for this feature | `/hipaa-check` returns COMPLIANT | [ ] |
+      260 -| AC-10 | all code changes | `dotnet build` — zero errors, zero warnings | [x] Verified 3× this session |
+      261 -| AC-12 | patientId `PT999999` AND healthPlanId `9999` (both unknown) | HTTP 200, status ERROR, errorCode MBR-001 (
+          -precedence) | [ ] |
+      262 -| AC-11 | N/A — frontend deferred, see Phase 4 | Not testable until follow-up plan | [ ] N/A |
+      263 -| AC-07 | any valid check | Response returned within 500ms (manual timing) | [ ] |
+      252 +| AC-01 | patientId `PT001234`, healthPlanId `1` (Cigna, plan_code=CIGNA) | HTTP 200, status ELIGIBLE | [x] PASS |
+      253 +| AC-02 | patientId `PT001235`, healthPlanId `1` (Cigna, plan_code=CIGNA) | HTTP 200, status INELIGIBLE | [x] PASS
+          +|
+      254 +| AC-03 | patientId `PT999999` (unknown), healthPlanId `1` | HTTP 200, status ERROR, errorCode MBR-001 | [x] PASS |
+      255 +| AC-04 | patientId `PT001234`, healthPlanId `9999` (unknown) | HTTP 200, status ERROR, errorCode PLN-001 | [x] PAS
+          +S |
+      256 +| AC-05 | member with NULL plan_code (test-only record, per spec.md OQ-03) vs any health plan | HTTP 200, status IN
+          +ELIGIBLE | [x] PASS — temp test record `PTTEST01` used and deleted after |
+      257 +| AC-06 | missing patientId or healthPlanId | HTTP 400 | [x] PASS |
+      258 +| AC-08 | any valid or ERROR check | One `eligibility_checks` row written with correlationId, status, checkedAt, da
+          +taSource | [x] PASS — 5 rows for 5 valid calls, verified via psql |
+      259 +| AC-09 | any generated code for this feature | `/hipaa-check` returns COMPLIANT | [x] PASS — COMPLIANT |
+      260 +| AC-10 | all code changes | `dotnet build` — zero errors, zero warnings | [x] PASS — verified 5× this session |
+      261 +| AC-12 | patientId `PT999999` AND healthPlanId `9999` (both unknown) | HTTP 200, status ERROR, errorCode MBR-001 (
+          +precedence) | [x] PASS |
+      262 +| AC-11 | N/A — frontend deferred, see Phase 4 | Not testable until follow-up plan | [ ] N/A — deferred |
+      263 +| AC-07 | any valid check | Response returned within 500ms (manual timing) | [x] PASS — 10.9ms observed |
+      264
+      265 -**Status:** [ ] Done
+      265 +**Status:** [x] Done (AC-11 N/A — deferred to follow-up plan per Phase 4 scope)
+      266
+      267  ---
+      268
+
+● Now Task 5.2 — running /spec-review again to get final results for the skill-checks table.
+
+● Skill(spec-review)
+  ⎿  Successfully loaded skill
+
+● === SPEC REVIEW ===
+
+  AC-01: PASS — verified live: POST /api/eligibility/check with PT001234/healthPlanId=1 returned HTTP 200, status: ELIGIBLE
+  AC-02: PASS — PT001235/healthPlanId=1 returned HTTP 200, status: INELIGIBLE
+  AC-03: PASS — PT999999 (unknown) returned HTTP 200, status: ERROR, errorCode: MBR-001
+  AC-04: PASS — healthPlanId=9999 (unknown) returned HTTP 200, status: ERROR, errorCode: PLN-001
+  AC-05: PASS — temporary test member (PTTEST01, NULL plan_code) returned HTTP 200, status: INELIGIBLE; test record removed after
+  AC-06: PASS — request missing healthPlanId returned HTTP 400
+  AC-07: PASS — measured response time 10.9ms, well under the 500ms budget
+  AC-08: PASS — psql inspection of eligibility_checks shows exactly one row per valid call (5 rows for 5 valid calls; the HTTP 400
+  case correctly wrote none)
+  AC-09: PASS — /hipaa-check this session returned COMPLIANT (0 violations, 0 credential exposures, 0 audit gaps)
+  AC-10: PASS — dotnet build run 5× across all Phase 1–3 tasks, 0 errors/0 warnings every time
+  AC-11: NOT_YET — frontend (api/client.ts, types/index.ts, NewAuthorizationPage.tsx) explicitly out of scope for plan.md; requires a
+  follow-up plan
+  AC-12: PASS — both patientId and healthPlanId unknown returned HTTP 200, status: ERROR, errorCode: MBR-001 (member-not-found
+  precedence confirmed)
+
+  CONSTRAINTS: RESPECTED — verified against the running code: zero modification to existing controllers/entities/DTOs (only appends),
+  route matches /api/eligibility/check, no service/DI registration added (confirmed via live Swagger check with no Program.cs edit),
+  EF Core FindAsync only (no raw SQL in application code), no PHI in the one ILogger call, no hardcoded credentials, no new
+  packages, build clean, audit table added via entity + init.sql-equivalent DDL without touching existing tables.
+
+  SCOPE CREEP: NONE — re-checked live behavior against all 6 non-goals; nothing in the running code touches payer APIs, blocks
+  submission, handles dates, checks benefits/procedures, caches, or adds auth.
+
+  SPEC GAPS: NONE remaining — the previously-flagged spec.md ↔ code schema mismatch (OQ-02) was resolved in an earlier turn; spec.md
+  now documents the actual id/correlation_id/status/checked_at/data_source schema.
+
+  ACTION: Ready for next phase for everything in scope. Backend implementation (Phases 1–3) and backend verification (Phase 5,
+  excluding AC-11) are complete with 11/12 applicable ACs at PASS. Only remaining item: AC-11/FR-08 (frontend wizard integration)
+  needs a follow-up plan — not a defect in what was built, a deliberately deferred scope boundary.
+
+  === END ===
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 3 lines, removed 3 lines
+      275
+      276  | Check | Result | Pass? |
+      277  |-------|--------|-------|
+      278 -| /hipaa-check | COMPLIANT / NON-COMPLIANT | [ ] |
+      279 -| /spec-review | FAIL count: [N] | [ ] |
+      278 +| /hipaa-check | COMPLIANT | [x] |
+      279 +| /spec-review | FAIL count: 0 (11/12 applicable ACs PASS; AC-11 NOT_YET — deferred, not failed) | [x] |
+      280
+      281 -**Status:** [ ] Done
+      281 +**Status:** [x] Done
+  ⎿  Wrote 92 lines to ..\..\Specs\member-eligibility\eval.md
+       1 # EVAL.md — Member Eligibility Check (Phase 1)
+       2 # Location : Specs/member-eligibility/eval.md
+       3 # Committed : YES
+       4 # Status    : BACKEND COMPLETE — AC-11 (frontend) deferred
+       5 # Author    : Claude Code | Date: 2026-09-10
+       6 # Depends on: tasks.md Phase 5 (Verification)
+       7 #
+       8 # PURPOSE: Evidence record for spec.md's acceptance criteria — build output,
+       9 #          runtime AC results, and skill-check output, captured at the end
+      10 #          of implementation.
+     … +93 lines (ctrl+o to expand)
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      288  Fill in: build output, AC results (Task 5.1 table), `/spec-review` paste, `/hipaa-check` paste. Note AC-11 as defer
+           red, not failed.
+      289
+      290  **Done when:** All blocking ACs (AC-01–AC-10, AC-12) are PASS. EVAL.md committed.
+      291 -**Status:** [ ] Done
+      291 +**Status:** [x] Done — all 11 blocking ACs PASS
+      292
+      293  ---
+      294
+
+● Now Task 5.4 — updating CLAUDE.md with the patterns this feature introduced.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(~\Downloads\sdd_demo\sdd_demo\CLAUDE.md)
+  ⎿  Added 8 lines
+      161  - react 18.3.1
+      162  - react-router-dom 6.26.0
+      163  - typescript 5.5.3
+      164 +
+      165 +---
+      166 +
+      167 +## Patterns Added — 2026-09-10
+      168 +
+      169 +- **Inline-controller-no-service pattern:** for small, single-endpoint features, logic (lookup, comparison, audit w
+          +rite, response shaping) lives directly in the controller action, injecting `PriorAuthDbContext` only — no service/i
+          +nterface layer, no `AddScoped` registration. Confirmed consistent with the existing `AuthorizationsController.cs` p
+          +attern. See `Controllers/EligibilityController.cs`.
+      170 +- **Narrowed, PHI-free audit table pattern:** an audit trail can be satisfied with `correlation_id` + `status` + `c
+          +hecked_at` + `data_source` only — deliberately omitting request-supplied identifiers (e.g. `patient_id`, `health_pl
+          +an_id`) to minimize identity-linkable data at rest, even when those identifiers aren't on CLAUDE.md §4.1's literal
+          +PHI list. See `eligibility_checks` / `EligibilityCheck` (`Models/Entities.cs`).
+      171 +- **Native (non-Docker) Postgres environments:** this repo's documented `docker compose down -v && docker compose u
+          +p -d` schema-reset workflow assumes Docker is installed. On a machine running PostgreSQL as a native service instea
+          +d, apply new `CREATE TABLE` statements directly via `psql` against the existing database (matching the DDL already
+          +committed to `database/init.sql`) rather than attempting a Docker-based reset.
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      303  ```
+      304
+      305  **Done when:** CLAUDE.md committed with new patterns.
+      306 -**Status:** [ ] Done
+      306 +**Status:** [x] Done — 3 patterns added (inline-controller-no-service, narrowed audit table, native-Postgres schema
+          +-apply workaround)
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 4 lines, removed 4 lines
+      34
+      35  ## Progress
+      36
+      37 -- Phase 1 — Model Layer     : [~] Code complete (1.1, 1.3, 1.4 done, build passing); Task 1.2 DB reset/verification
+         -pending
+      38 -- Phase 2 — Data Layer      : [ ] Not started
+      39 -- Phase 3 — Controller      : [ ] Not started
+      37 +- Phase 1 — Model Layer     : [x] Done (DB schema applied via psql — native Postgres, not Docker; see Notes in eval.
+         +md)
+      38 +- Phase 2 — Data Layer      : [x] Done
+      39 +- Phase 3 — Controller      : [x] Done
+      40  - Phase 4 — Frontend        : DEFERRED — out of scope for this plan (see Scope Note)
+      41 -- Phase 5 — Verification    : [ ] Not started
+      41 +- Phase 5 — Verification    : [x] Done — 11/11 blocking ACs PASS, AC-11 N/A (deferred)
+      42
+      43  ---
+      44
+
+● Update(~\Downloads\sdd_demo\sdd_demo\Specs\member-eligibility\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+       99
+      100  **Done when:** `docker compose down -v && docker compose up -d` completes, `docker compose ps` shows `pa_db` health
+           y, and the table exists in the running database
+      101  **AC covered:** AC-08 (backing store for the audit record)
+      102 -**Status:** [~] SQL added to init.sql; DB reset/verification skipped by user request — pending before this task is
+          -fully Done
+      102 +**Status:** [x] Done — with a deviation: this environment runs Postgres as a native Windows service (Docker is not
+          +installed here), so `docker compose down -v && up -d` could not be run. Applied the identical `CREATE TABLE` DDL di
+          +rectly via `psql` instead, non-destructively (no existing data was wiped). Verified via `\dt` and a live end-to-end
+          + request. See CLAUDE.md "Patterns Added" and eval.md Notes.
+      103
+      104  ---
+      105
+
+● All phases are complete. Final summary:
+
+  Phase 1 — Model Layer: EligibilityCheck entity (Entities.cs), EligibilityCheckRequest/Response DTOs (Dtos.cs), eligibility_checks
+  table.
+  Phase 2 — Data Layer: DbSet<EligibilityCheck> registered in PriorAuthDbContext.cs.
+  Phase 3 — Controller: EligibilityController.cs created (new file) — POST /api/eligibility/check, no service layer, confirmed via
+  live Swagger with zero Program.cs changes.
+  Phase 4 — Frontend: still deferred/out of scope, as documented throughout.
+  Phase 5 — Verification: all 11 blocking ACs (AC-01–AC-10, AC-12) PASS against the live endpoint; /hipaa-check COMPLIANT;
+  /spec-review 0 FAIL; eval.md created as the evidence record.
+
+  One thing worth flagging clearly: this machine runs PostgreSQL as a native Windows service, not Docker (Docker isn't installed
+  here) — a real gap between CLAUDE.md's documented workflow and this environment. Rather than force a nonexistent docker compose
+  command, I applied the eligibility_checks table directly via psql (identical DDL to what's committed in init.sql), which was
+  actually less destructive than the documented full-volume reset. I recorded this as a new CLAUDE.md pattern and in eval.md's Notes
+  so it isn't silently lost.
+
+  Two things also flagged along the way, both from build-blocking file locks caused by a stray auto-restarting PriorAuth.API process
+  (PIDs 14472, then 11172) — killed both times with your confirmation on the first occurrence.
+
+  Still open: AC-11/FR-08 (frontend wizard integration) — genuinely deferred, needs a follow-up plan covering api/client.ts,
+  types/index.ts, and NewAuthorizationPage.tsx. The API (dotnet run, PID 3200) is still running in the background if you want to
+  explore it via Swagger at http://localhost:5000/swagger.
+
+✻ Cogitated for 8m 57s · done 2:39 PM · 1 shell still running
+
+> /usage
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Settings  Status   Config   Usage   Stats
+
+  Session
+
+  Total cost:            $7.07
+  Total duration (API):  24m 7s
+  Total duration (wall): 2h 53m 23s
+  Total code changes:    1260 lines added, 50 lines removed
+  Usage by model:
+      claude-haiku-4-5:  940 input, 2.2k output, 94.0k cache read, 20.1k cache write ($0.0618)
+
+  Phase 2 — Data Layer: DbSet<EligibilityCheck> registered in PriorAuthDbContext.cs.
+  Phase 3 — Controller: EligibilityController.cs created (new file) — POST /api/eligibility/check, no service layer, confirmed via
+  live Swagger with zero Program.cs changes.
+  Phase 4 — Frontend: still deferred/out of scope, as documented throughout.
+  Phase 5 — Verification: all 11 blocking ACs (AC-01–AC-10, AC-12) PASS against the live endpoint; /hipaa-check COMPLIANT;
+  /spec-review 0 FAIL; eval.md created as the evidence record.
+
+  One thing worth flagging clearly: this machine runs PostgreSQL as a native Windows service, not Docker (Docker isn't installed
+  here) — a real gap between CLAUDE.md's documented workflow and this environment. Rather than force a nonexistent docker compose
+  command, I applied the eligibility_checks table directly via psql (identical DDL to what's committed in init.sql), which was
+  actually less destructive than the documented full-volume reset. I recorded this as a new CLAUDE.md pattern and in eval.md's Notes
+  so it isn't silently lost.
+
+  Two things also flagged along the way, both from build-blocking file locks caused by a stray auto-restarting PriorAuth.API process
+  (PIDs 14472, then 11172) — killed both times with your confirmation on the first occurrence.
+
+  Still open: AC-11/FR-08 (frontend wizard integration) — genuinely deferred, needs a follow-up plan covering api/client.ts,
+  types/index.ts, and NewAuthorizationPage.tsx. The API (dotnet run, PID 3200) is still running in the background if you want to
+  explore it via Swagger at http://localhost:5000/swagger.
+
+✻ Cogitated for 8m 57s · done 2:39 PM · 1 shell still running
+
+> /usage
+  ⎿  Settings dialog dismissed
+
+※ recap: Backend for the member eligibility check feature is done and fully verified (all tests passing); frontend integration into
+  the wizard is still deferred. Next: decide whether to start that frontend follow-up work now.
+
+> /usage
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Settings  Status   Config   Usage   Stats
+
+  Session
+
+  Total cost:            $7.13
+  Total duration (API):  24m 10s
+  Total duration (wall): 2h 57m 45s
+  Total code changes:    1260 lines added, 50 lines removed
+  Usage by model:
+      claude-haiku-4-5:  940 input, 2.2k output, 94.0k cache read, 20.1k cache write ($0.0618)
+  Phase 4 — Frontend: still deferred/out of scope, as documented throughout.
+  Phase 5 — Verification: all 11 blocking ACs (AC-01–AC-10, AC-12) PASS against the live endpoint; /hipaa-check COMPLIANT;
+  /spec-review 0 FAIL; eval.md created as the evidence record.
+
+  One thing worth flagging clearly: this machine runs PostgreSQL as a native Windows service, not Docker (Docker isn't installed
+  here) — a real gap between CLAUDE.md's documented workflow and this environment. Rather than force a nonexistent docker compose
+  command, I applied the eligibility_checks table directly via psql (identical DDL to what's committed in init.sql), which was
+  actually less destructive than the documented full-volume reset. I recorded this as a new CLAUDE.md pattern and in eval.md's Notes
+  so it isn't silently lost.
+
+  Two things also flagged along the way, both from build-blocking file locks caused by a stray auto-restarting PriorAuth.API process
+  (PIDs 14472, then 11172) — killed both times with your confirmation on the first occurrence.
+
+  Still open: AC-11/FR-08 (frontend wizard integration) — genuinely deferred, needs a follow-up plan covering api/client.ts,
+  types/index.ts, and NewAuthorizationPage.tsx. The API (dotnet run, PID 3200) is still running in the background if you want to
+  explore it via Swagger at http://localhost:5000/swagger.
+
+✻ Cogitated for 8m 57s · done 2:39 PM · 1 shell still running
+
+> /usage
+  ⎿  Settings dialog dismissed
+
+※ recap: Backend for the member eligibility check feature is done and fully verified (all tests passing); frontend integration into
+  the wizard is still deferred. Next: decide whether to start that frontend follow-up work now.
+
+> /usage
+  ⎿  Settings dialog dismissed
+
+> fix issues with dotnet run
+
+● Bash(tasklist //FI "IMAGENAME eq PriorAuth.API.exe" 2>&1; echo "---dotnet---"; tasklist //FI "IMAGENAME eq dotnet.exe" 2>&1)
+  ⎿  Image Name                     PID Session Name        Session#    Mem Usage
+     ========================= ======== ================ =========== ============
+     PriorAuth.API.exe             3200 Console                   11   1,28,116 K
+     … +5 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● Bash(curl -s -w "\nHTTP_STATUS:%{http_code}\n" http://localhost:5000/api/healthplans 2>&1)
+  ⎿  [
+       {
+         "healthPlanId": 1,
+     … +42 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+● The API currently running (PID 3200) is actually working fine — health plans endpoint responds correctly. I want to understand what
+  specific problem you're hitting before changing anything.
+
+● User declined to answer questions
+  ⎿  · What issue are you seeing with `dotnet run`? The instance already running (PID 3200) responds fine to requests, so I want to
+     reproduce your specific problem rather than guess. (File lock / can't rebuild / App crashes or won't start / Something else)
+
+✻ Brewed for 22s · done 2:54 PM · 1 shell still running
